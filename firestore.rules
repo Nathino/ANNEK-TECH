@@ -10,7 +10,9 @@ service cloud.firestore {
     // Content collection rules
     match /content/{document=**} {
       allow read: if true;  // Anyone can view content
-      allow write: if isAdmin();  // Only admin can modify content
+      allow create, delete: if isAdmin();  // Only admin can create/delete content
+      allow update: if isAdmin() || 
+                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'shares', 'comments', 'views', 'lastViewed']));  // Allow anyone to update engagement metrics only
     }
     
     // Media collection rules

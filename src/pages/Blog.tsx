@@ -190,12 +190,12 @@ const Blog: React.FC = () => {
             <div className="absolute bottom-0 right-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl"></div>
           </div>
           
-          <div className="relative z-10">
+          <div className="relative z-10 py-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-full text-emerald-700 dark:text-emerald-300 text-sm font-medium mb-6">
               <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
               Latest Updates
             </div>
-            <h1 className="text-3xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent leading-tight">
+            <h1 className="text-3xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent leading-loose py-4">
               Our Blog
             </h1>
             <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
