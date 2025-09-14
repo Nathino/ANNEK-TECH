@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://annektech.web.app/sitemap.xml
+
+# Disallow admin areas
+Disallow: /admin/
+
+# Allow all public pages
+Allow: /
+Allow: /blog/
+Allow: /portfolio/
+Allow: /contact/
+
+# Crawl delay (optional)
+Crawl-delay: 1

@@ -1,9 +1,14 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
+export default defineConfig(
+  ({ mode }) => {
+  // Load env file based on `mode` in the current working directory.
+  const env = loadEnv(mode, process.cwd(), '');
+  
+  return {
+    plugins: [react()],
   optimizeDeps: {
     exclude: ['lucide-react'],
     include: ['axios']
@@ -43,6 +48,25 @@ export default defineConfig({
         }
       }
     },
-    chunkSizeWarningLimit: 1000
+    chunkSizeWarningLimit: 1000,
+    // PWA optimization
+    target: 'esnext',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    }
+  },
+  // PWA specific configurations
+  define: {
+    // Make environment variables available to the app
+    'process.env': env,
+    __PWA_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0')
+  },
+  server: {
+    host: true
   }
+  };
 });

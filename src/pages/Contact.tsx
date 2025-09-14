@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Phone, Mail, MapPin, Facebook, Instagram, Send, Loader2 } from 'lucide-react';
+import SEOHead from '../components/SEOHead';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import toast from 'react-hot-toast';
@@ -56,8 +57,64 @@ const Contact: React.FC = () => {
     }));
   };
 
+  // Contact page structured data
+  const contactStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact ANNEK TECH",
+    "description": "Get in touch with ANNEK TECH for professional web development, custom software solutions, mobile app development, and digital transformation services in Ghana. Our expert team provides consultation, project planning, and technical support.",
+    "url": "https://annektech.web.app/contact",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "ANNEK TECH",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+233547214248",
+        "contactType": "customer service",
+        "email": "annektech.gh@gmail.com",
+        "areaServed": "GH",
+        "availableLanguage": "English"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Opposite Ghanass SHS",
+        "addressLocality": "Koforidua",
+        "addressRegion": "Eastern Region",
+        "addressCountry": "GH"
+      },
+      "sameAs": [
+        "https://twitter.com/annektech",
+        "https://facebook.com/annektech",
+        "https://instagram.com/annektech"
+      ]
+    }
+  };
+
   return (
     <div className="min-h-screen pt-16 bg-slate-50 dark:bg-slate-900">
+      <SEOHead
+        title="Contact ANNEK TECH | Web Development & Software Solutions"
+        description="Get in touch with ANNEK TECH for professional web development, custom software solutions, and digital transformation services in Ghana. Expert consultation."
+        keywords={[
+          'contact ANNEK TECH', 
+          'web development Ghana', 
+          'software development contact', 
+          'digital solutions Ghana', 
+          'tech consulting contact', 
+          'Ghana web developers',
+          'get in touch',
+          'consultation request',
+          'project inquiry',
+          'tech support Ghana',
+          'development services contact',
+          'IT consultation',
+          'web design consultation',
+          'software development inquiry',
+          'technology partnership'
+        ]}
+        canonicalUrl="https://annektech.web.app/contact"
+        structuredData={contactStructuredData}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">

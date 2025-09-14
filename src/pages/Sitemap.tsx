@@ -7,6 +7,10 @@ interface BlogPost {
   title: string;
   lastModified: string;
   slug?: string;
+  content?: {
+    featuredImage?: string;
+    excerpt?: string;
+  };
 }
 
 const Sitemap: React.FC = () => {
@@ -46,9 +50,10 @@ const Sitemap: React.FC = () => {
     
     const staticPages = [
       { url: '/', priority: '1.0', changefreq: 'weekly', lastmod: currentDate },
-      { url: '/portfolio', priority: '0.8', changefreq: 'monthly', lastmod: currentDate },
+      { url: '/portfolio', priority: '0.9', changefreq: 'monthly', lastmod: currentDate },
       { url: '/blog', priority: '0.9', changefreq: 'weekly', lastmod: currentDate },
-      { url: '/contact', priority: '0.7', changefreq: 'monthly', lastmod: currentDate }
+      { url: '/contact', priority: '0.8', changefreq: 'monthly', lastmod: currentDate },
+      { url: '/sitemap', priority: '0.3', changefreq: 'monthly', lastmod: currentDate }
     ];
 
     const blogPages = blogPosts.map(post => ({
@@ -61,13 +66,31 @@ const Sitemap: React.FC = () => {
     const allPages = [...staticPages, ...blogPages];
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${allPages.map(page => `  <url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${allPages.map(page => {
+  let urlEntry = `  <url>
     <loc>${baseUrl}${page.url}</loc>
     <lastmod>${page.lastmod || currentDate}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
-  </url>`).join('\n')}
+    <priority>${page.priority}</priority>`;
+  
+  // Add image sitemap for blog posts
+  if (page.url.startsWith('/blog/')) {
+    const post = blogPosts.find(p => `/blog/${p.id}` === page.url);
+    if (post?.content?.featuredImage) {
+      urlEntry += `
+    <image:image>
+      <image:loc>${post.content.featuredImage}</image:loc>
+      <image:title>${post.title}</image:title>
+      <image:caption>${post.content.excerpt || post.title}</image:caption>
+    </image:image>`;
+    }
+  }
+  
+  urlEntry += `
+  </url>`;
+  return urlEntry;
+}).join('\n')}
 </urlset>`;
 
     return sitemap;

@@ -4,6 +4,8 @@ import { ArrowRight, Code2, Building2, LineChart, Server, Smartphone, PenTool, C
 import { Link } from 'react-router-dom';
 import ProjectSlider from '../components/ProjectSlider';
 import FeaturedPartners from '../components/FeaturedPartners';
+import SEOHead from '../components/SEOHead';
+import SEOMonitor from '../components/SEOMonitor';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import toast from 'react-hot-toast';
@@ -78,8 +80,74 @@ const Home: React.FC = () => {
     </div>;
   }
 
+  // Organization structured data
+  const organizationStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ANNEK TECH",
+    "description": "Transforming ideas into digital reality with cutting-edge software solutions",
+    "url": "https://annektech.web.app",
+    "logo": "https://annektech.web.app/annek_tech.png",
+    "sameAs": [
+      "https://twitter.com/annektech",
+      "https://facebook.com/annektech",
+      "https://instagram.com/annektech"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+233-XXX-XXXX",
+      "contactType": "customer service",
+      "areaServed": "GH",
+      "availableLanguage": "English"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "GH",
+      "addressRegion": "Greater Accra"
+    },
+    "foundingDate": "2024",
+    "founders": [
+      {
+        "@type": "Person",
+        "name": "ANNEK TECH Team"
+      }
+    ]
+  };
+
   return (
     <div className="pt-16">
+      <SEOHead
+        title="ANNEK TECH - Digital Solutions & Web Development"
+        description="Transform your ideas into digital reality with ANNEK TECH's cutting-edge software solutions. Expert web development and digital transformation services in Ghana"
+        keywords={[
+          'ANNEK TECH', 
+          'web development Ghana', 
+          'software development', 
+          'digital solutions', 
+          'enterprise software', 
+          'custom web applications', 
+          'technology consulting', 
+          'Ghana tech company',
+          'mobile app development',
+          'e-commerce solutions',
+          'cloud computing',
+          'digital transformation',
+          'IT services Ghana',
+          'web design Ghana',
+          'programming services'
+        ]}
+        canonicalUrl="https://annektech.web.app"
+        structuredData={organizationStructuredData}
+      />
+      <SEOMonitor 
+        pageType="home" 
+        pageData={{
+          title: content.heroTitle || "ANNEK TECH - Digital Solutions",
+          description: content.heroDescription || "Transforming ideas into digital reality with cutting-edge software solutions",
+          keywords: ['ANNEK TECH', 'web development', 'software development', 'digital solutions', 'Ghana technology'],
+          url: 'https://annektech.web.app'
+        }}
+      />
       {/* Hero Section */}
       <section className="relative min-h-[50vh] md:min-h-[60vh] lg:min-h-[70vh] flex items-center">
         <div className="absolute inset-0 z-0">

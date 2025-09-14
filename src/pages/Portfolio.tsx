@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, Github, ShoppingCart, Leaf, Recycle, Download, Utensils, BookOpen, QrCode, Users } from 'lucide-react';
+import SEOHead from '../components/SEOHead';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import toast from 'react-hot-toast';
@@ -154,8 +155,58 @@ const Portfolio: React.FC = () => {
     ? projects 
     : projects.filter(p => p.technologies.some(t => t.toLowerCase().includes(filter.toLowerCase())));
 
+  // Portfolio structured data
+  const portfolioStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "ANNEK TECH Portfolio",
+    "description": "Explore our latest projects and see how we've helped businesses transform their digital presence with cutting-edge software solutions.",
+    "url": "https://annektech.web.app/portfolio",
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": projects.map((project, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "CreativeWork",
+          "name": project.title,
+          "description": project.description,
+          "url": project.liveUrl,
+          "creator": {
+            "@type": "Organization",
+            "name": "ANNEK TECH"
+          },
+          "keywords": project.technologies.join(", ")
+        }
+      }))
+    }
+  };
+
   return (
     <div className="min-h-screen pt-16 bg-slate-50 dark:bg-slate-900">
+      <SEOHead
+        title="ANNEK TECH Portfolio | Web Development Projects"
+        description="Explore ANNEK TECH's portfolio of successful web development projects and software solutions. See how we've helped businesses transform their digital presence."
+        keywords={[
+          'ANNEK TECH portfolio', 
+          'web development projects', 
+          'software solutions Ghana', 
+          'mobile app development', 
+          'custom web applications', 
+          'digital transformation projects',
+          'project showcase',
+          'case studies',
+          'success stories',
+          'client work',
+          'development portfolio',
+          'tech projects Ghana',
+          'web apps portfolio',
+          'software portfolio',
+          'development examples'
+        ]}
+        canonicalUrl="https://annektech.web.app/portfolio"
+        structuredData={portfolioStructuredData}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

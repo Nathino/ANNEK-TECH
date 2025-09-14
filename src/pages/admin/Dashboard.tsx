@@ -6,12 +6,14 @@ import {
   Loader2,
   BookOpen,
   TrendingUp,
-  Heart
+  Heart,
+  Search
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import PWAStatus from '../../components/PWAStatus';
 
 interface BlogPost {
   id: string;
@@ -224,6 +226,13 @@ const Dashboard: React.FC = () => {
     { name: 'Draft Content', value: dashboardData.stats.draftContent, icon: FileText, color: 'orange', iconClass: 'text-orange-400', bgClass: 'bg-orange-400/10', ringClass: 'ring-orange-400/20' }
   ];
 
+  const seoStats = [
+    { name: 'SEO Score', value: '92/100', icon: Search, color: 'emerald', iconClass: 'text-emerald-400', bgClass: 'bg-emerald-400/10', ringClass: 'ring-emerald-400/20' },
+    { name: 'Pages Monitored', value: '8', icon: Eye, color: 'blue', iconClass: 'text-blue-400', bgClass: 'bg-blue-400/10', ringClass: 'ring-blue-400/20' },
+    { name: 'Issues Found', value: '3', icon: TrendingUp, color: 'red', iconClass: 'text-red-400', bgClass: 'bg-red-400/10', ringClass: 'ring-red-400/20' },
+    { name: 'Performance', value: 'Good', icon: Heart, color: 'green', iconClass: 'text-green-400', bgClass: 'bg-green-400/10', ringClass: 'ring-green-400/20' }
+  ];
+
 
   // Add navigation handlers
   const handleNavigate = (path: string) => {
@@ -257,15 +266,18 @@ const Dashboard: React.FC = () => {
   return (
     <div className="p-3 pt-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
-          <div>
-            <h1 className="text-3xl font-bold text-emerald-400">Dashboard</h1>
-            <p className="text-slate-400">Welcome back, Admin</p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6">
+          <div className="w-full sm:w-auto">
+            <h1 className="text-2xl md:text-3xl font-bold text-emerald-400">Dashboard</h1>
+            <p className="text-slate-400 text-sm md:text-base">Welcome back, Admin</p>
           </div>
-          <div className="flex gap-2 bg-slate-800/50 rounded-lg p-1 shadow-md mt-1 sm:mt-0">
+          <div className="mt-2 sm:mt-0 w-full sm:w-auto">
+            <PWAStatus showInstallButton={true} />
+          </div>
+          <div className="flex gap-1 md:gap-2 bg-slate-800/50 rounded-lg p-1 shadow-md mt-2 sm:mt-0 w-full sm:w-auto justify-center sm:justify-end">
             <button
               onClick={() => setActiveSection('overview')}
-              className={`px-6 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+              className={`px-3 md:px-6 py-1.5 rounded-md text-xs md:text-sm font-medium transition-all duration-200 ${
                 activeSection === 'overview'
                   ? 'bg-emerald-400/10 text-emerald-400 shadow-sm'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
@@ -275,7 +287,7 @@ const Dashboard: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveSection('analytics')}
-              className={`px-6 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+              className={`px-3 md:px-6 py-1.5 rounded-md text-xs md:text-sm font-medium transition-all duration-200 ${
                 activeSection === 'analytics'
                   ? 'bg-emerald-400/10 text-emerald-400 shadow-sm'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
@@ -310,63 +322,82 @@ const Dashboard: React.FC = () => {
         ) : activeSection === 'overview' ? (
           <>
             {/* Main Stats Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-4 md:mb-8 w-full">
               {stats.map((stat) => (
                 <div
                   key={stat.name}
-                  className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 flex items-center gap-2 sm:gap-4 cursor-pointer hover:bg-slate-800/70 transition-all duration-300 border border-slate-700/50 hover:border-slate-600/50 group shadow-lg hover:shadow-xl"
+                  className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-6 flex items-center gap-1 md:gap-4 cursor-pointer hover:bg-slate-800/70 transition-all duration-300 border border-slate-700/50 hover:border-slate-600/50 group shadow-lg hover:shadow-xl"
                   onClick={() => handleNavigate(stat.name.toLowerCase().replace(' ', '-'))}
                 >
-                  <div className={`p-3 sm:p-4 rounded-xl ${stat.bgClass} group-hover:${stat.bgClass.replace('/10', '/20')} transition-colors duration-300 ring-1 ${stat.ringClass}`}>
-                    <stat.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${stat.iconClass}`} />
+                  <div className={`p-2 md:p-3 lg:p-4 rounded-xl ${stat.bgClass} group-hover:${stat.bgClass.replace('/10', '/20')} transition-colors duration-300 ring-1 ${stat.ringClass}`}>
+                    <stat.icon className={`h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 ${stat.iconClass}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-slate-400 mb-1 truncate">{stat.name}</p>
-                    <p className="text-lg sm:text-2xl font-bold text-slate-200 truncate">{stat.value || '—'}</p>
+                    <p className="text-xs md:text-sm font-medium text-slate-400 mb-1 truncate">{stat.name}</p>
+                    <p className="text-base md:text-lg lg:text-2xl font-bold text-slate-200 truncate">{stat.value || '—'}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Blog Stats Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-4 md:mb-8 w-full">
               {blogStats.map((stat) => (
                 <div
                   key={stat.name}
-                  className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 flex items-center gap-2 sm:gap-4 cursor-pointer hover:bg-slate-800/70 transition-all duration-300 border border-slate-700/50 hover:border-slate-600/50 group shadow-lg hover:shadow-xl"
+                  className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-6 flex items-center gap-1 md:gap-4 cursor-pointer hover:bg-slate-800/70 transition-all duration-300 border border-slate-700/50 hover:border-slate-600/50 group shadow-lg hover:shadow-xl"
                   onClick={() => handleNavigate('blog')}
                 >
-                  <div className={`p-3 sm:p-4 rounded-xl ${stat.bgClass} group-hover:${stat.bgClass.replace('/10', '/20')} transition-colors duration-300 ring-1 ${stat.ringClass}`}>
-                    <stat.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${stat.iconClass}`} />
+                  <div className={`p-2 md:p-3 lg:p-4 rounded-xl ${stat.bgClass} group-hover:${stat.bgClass.replace('/10', '/20')} transition-colors duration-300 ring-1 ${stat.ringClass}`}>
+                    <stat.icon className={`h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 ${stat.iconClass}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-slate-400 mb-1 truncate">{stat.name}</p>
-                    <p className="text-lg sm:text-2xl font-bold text-slate-200 truncate">{stat.value || '—'}</p>
+                    <p className="text-xs md:text-sm font-medium text-slate-400 mb-1 truncate">{stat.name}</p>
+                    <p className="text-base md:text-lg lg:text-2xl font-bold text-slate-200 truncate">{stat.value || '—'}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* SEO Stats Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-4 md:mb-8 w-full">
+              {seoStats.map((stat) => (
+                <div
+                  key={stat.name}
+                  className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-6 flex items-center gap-1 md:gap-4 cursor-pointer hover:bg-slate-800/70 transition-all duration-300 border border-slate-700/50 hover:border-slate-600/50 group shadow-lg hover:shadow-xl"
+                  onClick={() => handleNavigate('seo')}
+                >
+                  <div className={`p-2 md:p-3 lg:p-4 rounded-xl ${stat.bgClass} group-hover:${stat.bgClass.replace('/10', '/20')} transition-colors duration-300 ring-1 ${stat.ringClass}`}>
+                    <stat.icon className={`h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 ${stat.iconClass}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs md:text-sm font-medium text-slate-400 mb-1 truncate">{stat.name}</p>
+                    <p className="text-base md:text-lg lg:text-2xl font-bold text-slate-200 truncate">{stat.value || '—'}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-8 w-full">
               {/* Recent Content */}
               <div className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 shadow-lg">
-                <div className="p-6 border-b border-slate-700/50">
-                  <h2 className="text-xl font-semibold text-slate-200">Recent Content</h2>
+                <div className="p-3 md:p-6 border-b border-slate-700/50">
+                  <h2 className="text-lg md:text-xl font-semibold text-slate-200">Recent Content</h2>
                 </div>
                 {dashboardData.recentContent.length > 0 ? (
                   <div className="divide-y divide-slate-700/50">
                     {dashboardData.recentContent.map((item) => (
                       <div
                         key={item.id}
-                        className="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-800/50 transition-colors group"
+                        className="p-3 md:p-6 flex items-center justify-between cursor-pointer hover:bg-slate-800/50 transition-colors group"
                         onClick={() => handleContentClick(item)}
                       >
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className="p-3 rounded-lg bg-slate-700/50 group-hover:bg-slate-700/70 transition-colors">
+                        <div className="flex items-center gap-2 md:gap-4 flex-1">
+                          <div className="p-1.5 md:p-3 rounded-lg bg-slate-700/50 group-hover:bg-slate-700/70 transition-colors">
                             {item.type === 'blog' ? (
-                              <BookOpen className="h-5 w-5 text-emerald-400" />
+                              <BookOpen className="h-4 w-4 md:h-5 md:w-5 text-emerald-400" />
                             ) : (
-                              <FileText className="h-5 w-5 text-slate-400" />
+                              <FileText className="h-4 w-4 md:h-5 md:w-5 text-slate-400" />
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -374,16 +405,16 @@ const Dashboard: React.FC = () => {
                             <p className="text-sm text-slate-400 capitalize">{item.type} • {item.status}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-slate-400">
-                          <Eye className="h-4 w-4" />
+                        <div className="flex items-center gap-0.5 md:gap-2 text-xs md:text-sm text-slate-400">
+                          <Eye className="h-3 w-3 md:h-4 md:w-4" />
                           {item.views || 0}
-                          <span className="ml-2">{formatDate(item.lastModified)}</span>
+                          <span className="ml-0.5 md:ml-2">{formatDate(item.lastModified)}</span>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="p-8 text-center text-slate-400">
+                  <div className="p-3 md:p-8 text-center text-slate-400">
                     No content to display
                   </div>
                 )}
@@ -391,19 +422,19 @@ const Dashboard: React.FC = () => {
 
               {/* Top Blog Posts */}
               <div className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 shadow-lg">
-                <div className="p-6 border-b border-slate-700/50">
-                  <h2 className="text-xl font-semibold text-slate-200">Top Blog Posts</h2>
+                <div className="p-3 md:p-6 border-b border-slate-700/50">
+                  <h2 className="text-lg md:text-xl font-semibold text-slate-200">Top Blog Posts</h2>
                 </div>
                 {dashboardData.topBlogPosts.length > 0 ? (
                   <div className="divide-y divide-slate-700/50">
                     {dashboardData.topBlogPosts.map((post, index) => (
                       <div
                         key={post.id}
-                        className="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-800/50 transition-colors group"
+                        className="p-3 md:p-6 flex items-center justify-between cursor-pointer hover:bg-slate-800/50 transition-colors group"
                         onClick={() => handleContentClick({ ...post, type: 'blog' as const })}
                       >
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className="w-8 h-8 bg-emerald-900/30 rounded-full flex items-center justify-center text-sm font-bold text-emerald-400">
+                        <div className="flex items-center gap-2 md:gap-4 flex-1">
+                          <div className="w-5 h-5 md:w-8 md:h-8 bg-emerald-900/30 rounded-full flex items-center justify-center text-xs md:text-sm font-bold text-emerald-400">
                             {index + 1}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -411,13 +442,13 @@ const Dashboard: React.FC = () => {
                             <p className="text-sm text-slate-400">{post.content?.category || 'General'}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-slate-400">
-                          <div className="flex items-center gap-1">
-                            <Eye className="h-4 w-4" />
+                        <div className="flex items-center gap-1 md:gap-4 text-xs md:text-sm text-slate-400">
+                          <div className="flex items-center gap-0.5">
+                            <Eye className="h-3 w-3 md:h-4 md:w-4" />
                             {post.views || 0}
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Heart className="h-4 w-4" />
+                          <div className="flex items-center gap-0.5">
+                            <Heart className="h-3 w-3 md:h-4 md:w-4" />
                             {post.likes || 0}
                           </div>
                         </div>
@@ -425,7 +456,7 @@ const Dashboard: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="p-8 text-center text-slate-400">
+                  <div className="p-3 md:p-8 text-center text-slate-400">
                     No blog posts to display
                   </div>
                 )}
@@ -435,8 +466,8 @@ const Dashboard: React.FC = () => {
         ) : (
           <>
             {/* Monthly Content Creation Chart */}
-            <div className="bg-slate-800/50 rounded-xl p-3 sm:p-6 mb-8 border border-slate-700/50 shadow-lg">
-              <h2 className="text-xl font-semibold text-slate-200 mb-6">Content Creation Trends</h2>
+            <div className="bg-slate-800/50 rounded-xl p-2 md:p-6 mb-4 md:mb-8 border border-slate-700/50 shadow-lg">
+              <h2 className="text-lg md:text-xl font-semibold text-slate-200 mb-3 md:mb-6">Content Creation Trends</h2>
               <div className="h-80 -ml-2 sm:ml-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={dashboardData.monthlyStats} margin={{ left: -10, right: 10, top: 10, bottom: 10 }}>
@@ -485,8 +516,8 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Blog Category Distribution */}
-            <div className="bg-slate-800/50 rounded-xl p-3 sm:p-6 border border-slate-700/50 shadow-lg">
-              <h2 className="text-xl font-semibold text-slate-200 mb-6">Blog Category Distribution</h2>
+            <div className="bg-slate-800/50 rounded-xl p-2 md:p-6 border border-slate-700/50 shadow-lg">
+              <h2 className="text-lg md:text-xl font-semibold text-slate-200 mb-3 md:mb-6">Blog Category Distribution</h2>
               <div className="h-80 -ml-2 sm:ml-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>

@@ -27,13 +27,13 @@ const safeStorage = {
 };
 
 const firebaseConfig = {
-  apiKey: "AIzaSyByWIWExVaEtfk9_Qfwv13zR62W35LOEKE",
-  authDomain: "annektech.firebaseapp.com",
-  projectId: "annektech",
-  storageBucket: "annektech.firebasestorage.app",
-  messagingSenderId: "1072516256382",
-  appId: "1:1072516256382:web:6d954239b7eda366e53e2f",
-  measurementId: "G-8XYYFVF19M"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
@@ -68,7 +68,15 @@ export const storage = getStorage(app);
 // Initialize admin credentials
 export async function initializeAdminAccount() {
   try {
-    await createUserWithEmailAndPassword(auth, "adminannektech@gmail.com", "Nat@0543485978");
+    const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+    
+    if (!adminEmail || !adminPassword) {
+      console.error("Admin credentials not found in environment variables");
+      return;
+    }
+    
+    await createUserWithEmailAndPassword(auth, adminEmail, adminPassword);
   } catch (error) {
     console.log("Admin account already exists or error occurred:", error);
   }

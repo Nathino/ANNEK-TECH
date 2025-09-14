@@ -334,10 +334,10 @@ const ContentNew: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 p-8 pt-24">
+    <div className="min-h-screen bg-slate-900 p-2 pt-24 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/admin/content')}
@@ -346,14 +346,14 @@ const ContentNew: React.FC = () => {
               <ArrowLeft className="w-6 h-6" />
             </button>
             <div>
-              <h1 className="text-4xl font-bold text-emerald-400 mb-2">Add New Content</h1>
-              <p className="text-slate-400 text-lg">Create new content for your website</p>
+              <h1 className="text-2xl md:text-4xl font-bold text-emerald-400 mb-2">Add New Content</h1>
+              <p className="text-slate-400 text-sm md:text-lg">Create new content for your website</p>
             </div>
           </div>
           <button
             onClick={handleSave}
             disabled={saving || Object.keys(errors).length > 0}
-            className="flex items-center px-6 py-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-emerald-500/25"
+            className="flex items-center px-4 md:px-6 py-2 md:py-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-emerald-500/25 text-sm md:text-base"
           >
             <Save className="w-5 h-5 mr-2" />
             {saving ? 'Saving...' : 'Save Content'}
@@ -361,10 +361,10 @@ const ContentNew: React.FC = () => {
         </div>
 
         {/* Content Type Selection */}
-        <div className="mb-8">
-          <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl p-6 border border-emerald-500/20">
-            <h2 className="text-xl font-semibold text-slate-200 mb-4">Content Type</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="mb-6 md:mb-8">
+          <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl p-4 md:p-6 border border-emerald-500/20">
+            <h2 className="text-lg md:text-xl font-semibold text-slate-200 mb-3 md:mb-4">Content Type</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
               {[
                 { value: 'home', label: 'Home Page', icon: '🏠' },
                 { value: 'portfolio', label: 'Portfolio', icon: '💼' },
@@ -376,26 +376,26 @@ const ContentNew: React.FC = () => {
                 <button
                   key={option.value}
                   onClick={() => handleTypeChange(option.value as NewContentItem['type'])}
-                  className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                  className={`p-3 md:p-4 rounded-xl border-2 transition-all duration-200 ${
                     content.type === option.value
                       ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
                       : 'border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-600 hover:bg-slate-800'
                   }`}
                 >
-                  <div className="text-2xl mb-2">{option.icon}</div>
-                  <div className="text-sm font-medium">{option.label}</div>
+                  <div className="text-xl md:text-2xl mb-1 md:mb-2">{option.icon}</div>
+                  <div className="text-xs md:text-sm font-medium">{option.label}</div>
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="bg-slate-800/50 rounded-2xl p-8 space-y-8 border border-slate-700/50">
+        <div className="bg-slate-800/50 rounded-2xl p-4 md:p-8 space-y-6 md:space-y-8 border border-slate-700/50">
           {/* Basic Information */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-slate-200 mb-4">Basic Information</h3>
+          <div className="space-y-4 md:space-y-6">
+            <h3 className="text-lg md:text-xl font-semibold text-slate-200 mb-3 md:mb-4">Basic Information</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Content Title *
@@ -447,7 +447,7 @@ const ContentNew: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Status
@@ -624,13 +624,13 @@ const ContentNew: React.FC = () => {
 
           {/* Blog Post Fields */}
           {content.type === 'blog' && (
-            <div className="space-y-8">
+            <div className="space-y-6 md:space-y-8">
               {/* SEO Fields */}
-              <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl p-6 border border-blue-500/20">
-                <h3 className="text-xl font-semibold text-slate-200 mb-4 flex items-center gap-2">
+              <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl p-4 md:p-6 border border-blue-500/20">
+                <h3 className="text-lg md:text-xl font-semibold text-slate-200 mb-3 md:mb-4 flex items-center gap-2">
                   <span>🔍</span> SEO Settings
                 </h3>
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-6">
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 md:p-4 mb-4 md:mb-6">
                   <p className="text-sm text-blue-300 flex items-start gap-2">
                     <span className="text-blue-400 mt-0.5">💡</span>
                     <span>
@@ -639,7 +639,7 @@ const ContentNew: React.FC = () => {
                     </span>
                   </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
                       URL Slug
@@ -722,8 +722,8 @@ const ContentNew: React.FC = () => {
               </div>
 
               {/* Blog Content */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-slate-200 mb-4 flex items-center gap-2">
+              <div className="space-y-4 md:space-y-6">
+                <h3 className="text-lg md:text-xl font-semibold text-slate-200 mb-3 md:mb-4 flex items-center gap-2">
                   <span>📝</span> Blog Content
                 </h3>
                 
@@ -856,7 +856,7 @@ const ContentNew: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
                       Category

@@ -10,7 +10,7 @@ const AdminLayout: React.FC = () => {
     <div className="min-h-screen bg-slate-900">
       <AdminNavbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Sidebar isOpen={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <main className="pt-16 md:pl-64 mx-4 my-1 md:mx-6 md:my-2">
+      <main className="pt-16 md:pl-64 mx-0.5 my-1 md:mx-3 md:my-2">
         <Outlet />
       </main>
     </div>

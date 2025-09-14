@@ -12,6 +12,8 @@ import Sitemap from './pages/Sitemap';
 import AdminLayout from './components/AdminLayout';
 import Login from './pages/admin/Login';
 import ProtectedRoute from './components/ProtectedRoute';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
+import PWAStatus from './components/PWAStatus';
 
 // Lazy load admin pages for better performance
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -23,6 +25,7 @@ const BlogAnalytics = lazy(() => import('./pages/admin/BlogAnalytics'));
 const MediaManager = lazy(() => import('./pages/admin/MediaManager'));
 const Messages = lazy(() => import('./pages/admin/Messages'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
+const SEOMonitor = lazy(() => import('./pages/admin/SEOMonitor'));
 
 // Loading component for Suspense
 const LoadingSpinner = () => (
@@ -60,10 +63,14 @@ const AppRoutes: React.FC = () => {
                 <Route path="media" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><MediaManager /></Suspense></ProtectedRoute>} />
                 <Route path="messages" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><Messages /></Suspense></ProtectedRoute>} />
                 <Route path="settings" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><Settings /></Suspense></ProtectedRoute>} />
+                <Route path="seo" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><SEOMonitor /></Suspense></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
       </Routes>
       {!isAdminRoute && <Footer />}
+      
+      {/* PWA Components */}
+      <PWAInstallPrompt />
     </div>
   );
 };

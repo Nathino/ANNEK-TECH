@@ -9,7 +9,8 @@ import {
   X,
   Mail,
   BookOpen,
-  BarChart3
+  BarChart3,
+  Search
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -33,6 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
         { name: 'Analytics', href: '/admin/blog/analytics', icon: BarChart3 },
       ]
     },
+    { name: 'SEO Monitor', href: '/admin/seo', icon: Search },
     { name: 'Media', href: '/admin/media', icon: Image },
     { name: 'Messages', href: '/admin/messages', icon: Mail },
     { name: 'Settings', href: '/admin/settings', icon: Settings },

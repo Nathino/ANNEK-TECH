@@ -192,11 +192,11 @@ const BlogManagement: React.FC = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+            className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -218,7 +218,7 @@ const BlogManagement: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+            className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -239,7 +239,7 @@ const BlogManagement: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+            className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -260,7 +260,7 @@ const BlogManagement: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+            className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -279,7 +279,7 @@ const BlogManagement: React.FC = () => {
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-slate-800/50 rounded-xl p-6 shadow-lg mb-8">
+        <div className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg mb-6 md:mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Filter className="h-5 w-5 text-slate-400" />
             <h3 className="text-lg font-semibold text-slate-200">Filters & Search</h3>
@@ -339,19 +339,19 @@ const BlogManagement: React.FC = () => {
             <table className="w-full min-w-[800px]">
               <thead className="bg-slate-700">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                     Post
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                     Category
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                     Analytics
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                     Date
                   </th>
                   <th className="px-6 py-4 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">
@@ -368,7 +368,7 @@ const BlogManagement: React.FC = () => {
                     transition={{ delay: index * 0.05 }}
                     className="hover:bg-slate-700/50"
                   >
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-3 md:py-4">
                       <div className="flex items-center">
                         <div className="h-12 w-12 flex-shrink-0">
                           <img
@@ -402,12 +402,12 @@ const BlogManagement: React.FC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-3 md:py-4">
                       <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-white rounded-full ${categoryInfo[post.content.category as keyof typeof categoryInfo]?.color || 'bg-slate-500'}`}>
                         {categoryInfo[post.content.category as keyof typeof categoryInfo]?.icon || '📁'} {categoryInfo[post.content.category as keyof typeof categoryInfo]?.name || post.content.category}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-3 md:py-4">
                       <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${
                         post.status === 'published'
                           ? 'bg-emerald-900/30 text-emerald-400'
@@ -416,7 +416,7 @@ const BlogManagement: React.FC = () => {
                         {post.status === 'published' ? 'Published' : 'Draft'}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-3 md:py-4">
                       <div className="flex items-center space-x-4 text-sm text-slate-400">
                         <div className="flex items-center">
                           <Eye className="h-4 w-4 mr-1" />
@@ -442,7 +442,7 @@ const BlogManagement: React.FC = () => {
                         {formatDate(post.lastModified)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-3 md:px-6 py-3 md:py-4 text-right">
                       <div className="flex items-center justify-end space-x-2">
                         <Link
                           to={`/blog/${post.id}`}

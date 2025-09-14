@@ -160,29 +160,29 @@ const ContentManager: React.FC = () => {
 
   return (
     <div className="p-3 pt-8">
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-emerald-400">Content Manager</h1>
-          <p className="text-slate-400 mt-0.5">Manage your website content</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-emerald-400">Content Manager</h1>
+          <p className="text-slate-400 mt-0.5 text-sm md:text-base">Manage your website content</p>
         </div>
         <button
           onClick={() => navigate('/admin/content/new')}
-          className="flex items-center px-3 py-1.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+          className="flex items-center px-3 md:px-4 py-2 md:py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors text-sm md:text-base"
         >
-          <Plus className="w-5 h-5 mr-1.5" />
+          <Plus className="w-4 h-4 md:w-5 md:h-5 mr-1.5" />
           Add New Content
         </button>
       </div>
 
       {/* Filters */}
-      <div className="mb-2 flex gap-2">
+      <div className="mb-4 md:mb-6 flex flex-col sm:flex-row gap-2 md:gap-3">
         <select
           value={selectedType}
           onChange={(e) => {
             setSelectedType(e.target.value);
             setSelectedSection('all');
           }}
-          className="bg-slate-800 text-slate-200 rounded-lg px-3 py-1.5 border border-slate-700"
+          className="bg-slate-800 text-slate-200 rounded-lg px-3 md:px-4 py-2 md:py-2.5 border border-slate-700 text-sm md:text-base"
         >
           <option value="all">All Pages</option>
           <option value="home">Home Page</option>
@@ -194,7 +194,7 @@ const ContentManager: React.FC = () => {
         <select
           value={selectedSection}
           onChange={(e) => setSelectedSection(e.target.value)}
-          className="bg-slate-800 text-slate-200 rounded-lg px-3 py-1.5 border border-slate-700"
+          className="bg-slate-800 text-slate-200 rounded-lg px-3 md:px-4 py-2 md:py-2.5 border border-slate-700 text-sm md:text-base"
         >
           <option value="all">All Sections</option>
           {getSections(selectedType).map((section) => (
@@ -207,21 +207,21 @@ const ContentManager: React.FC = () => {
 
       {/* Content Table */}
       {loading ? (
-        <div className="text-center py-4 text-slate-400">Loading content...</div>
+        <div className="text-center py-6 md:py-8 text-slate-400 text-sm md:text-base">Loading content...</div>
       ) : content.length === 0 ? (
-        <div className="text-center py-4 text-slate-400">No content found. Add some content to get started.</div>
+        <div className="text-center py-6 md:py-8 text-slate-400 text-sm md:text-base">No content found. Add some content to get started.</div>
       ) : (
         <div className="bg-slate-800/50 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-slate-800">
-                  <th className="px-6 py-4 text-left text-sm text-slate-400">Title</th>
-                  <th className="px-6 py-4 text-left text-sm text-slate-400">Page</th>
-                  <th className="px-6 py-4 text-left text-sm text-slate-400">Section</th>
-                  <th className="px-6 py-4 text-left text-sm text-slate-400">Status</th>
-                  <th className="px-6 py-4 text-left text-sm text-slate-400">Last Modified</th>
-                  <th className="px-6 py-4 text-left text-sm text-slate-400">Actions</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm text-slate-400">Title</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm text-slate-400">Page</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm text-slate-400">Section</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm text-slate-400">Status</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm text-slate-400">Last Modified</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm text-slate-400">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700">
@@ -230,13 +230,13 @@ const ContentManager: React.FC = () => {
                   .filter(item => selectedSection === 'all' || item.section === selectedSection)
                   .map((item, index) => (
                     <tr key={`${item.id}-${index}`} className="hover:bg-slate-800/50">
-                      <td className="px-6 py-4 text-slate-200">{item.title}</td>
-                      <td className="px-6 py-4 text-slate-400 capitalize">{item.type}</td>
-                      <td className="px-6 py-4 text-slate-400 capitalize">{item.section}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 md:px-6 py-3 md:py-4 text-slate-200 text-sm md:text-base">{item.title}</td>
+                      <td className="px-3 md:px-6 py-3 md:py-4 text-slate-400 capitalize text-sm md:text-base">{item.type}</td>
+                      <td className="px-3 md:px-6 py-3 md:py-4 text-slate-400 capitalize text-sm md:text-base">{item.section}</td>
+                      <td className="px-3 md:px-6 py-3 md:py-4">
                         <button
                           onClick={() => handleToggleStatus(item.id, item.status)}
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          className={`px-2 md:px-3 py-1 md:py-1.5 rounded-full text-xs font-medium ${
                             item.status === 'published'
                               ? 'bg-emerald-500/20 text-emerald-400'
                               : 'bg-slate-500/20 text-slate-400'
@@ -245,24 +245,24 @@ const ContentManager: React.FC = () => {
                           {item.status}
                         </button>
                       </td>
-                      <td className="px-6 py-4 text-slate-400">
+                      <td className="px-3 md:px-6 py-3 md:py-4 text-slate-400 text-xs md:text-sm">
                         {new Date(item.lastModified).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex space-x-3">
+                      <td className="px-3 md:px-6 py-3 md:py-4">
+                        <div className="flex space-x-2 md:space-x-3">
                           <button
                             onClick={() => handleEdit(item.id)}
                             className="text-blue-400 hover:text-blue-300"
                             title="Edit"
                           >
-                            <Edit className="w-5 h-5" />
+                            <Edit className="w-4 h-4 md:w-5 md:h-5" />
                           </button>
                           <button
                             onClick={() => handleDelete(item.id)}
                             className="text-red-400 hover:text-red-300"
                             title="Delete"
                           >
-                            <Trash className="w-5 h-5" />
+                            <Trash className="w-4 h-4 md:w-5 md:h-5" />
                           </button>
                           <button
                             onClick={() => {
@@ -274,7 +274,7 @@ const ContentManager: React.FC = () => {
                             className="text-slate-400 hover:text-slate-300"
                             title="Preview"
                           >
-                            <Eye className="w-5 h-5" />
+                            <Eye className="w-4 h-4 md:w-5 md:h-5" />
                           </button>
                         </div>
                       </td>

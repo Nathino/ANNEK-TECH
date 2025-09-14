@@ -162,31 +162,31 @@ const BlogAnalytics: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-3 pt-8 flex items-center justify-center">
+      <div className="p-1 pt-8 md:p-3 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500" />
       </div>
     );
   }
 
   return (
-    <div className="p-3 pt-8">
+    <div className="p-1 pt-8 md:p-3">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-emerald-400 mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-emerald-400 mb-2">
                 Blog Analytics
               </h1>
-              <p className="text-slate-400 mt-0.5">
+              <p className="text-slate-400 mt-0.5 text-sm md:text-base">
                 Track your blog performance, views, and engagement metrics
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               <select
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value)}
-                className="px-4 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-700 text-slate-200"
+                className="px-2 md:px-4 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-700 text-slate-200 text-sm md:text-base"
               >
                 <option value="7d">Last 7 days</option>
                 <option value="30d">Last 30 days</option>
@@ -200,25 +200,26 @@ const BlogAnalytics: React.FC = () => {
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="border-b border-slate-700">
-            <nav className="-mb-px flex space-x-8">
+          <div className="bg-slate-800/50 rounded-xl p-2 shadow-lg">
+            <nav className="grid grid-cols-2 md:flex md:space-x-2 gap-1">
               {[
-                { id: 'overview', name: 'Overview', icon: BarChart3 },
-                { id: 'views', name: 'Views & Stats', icon: Eye },
-                { id: 'interactions', name: 'Interactions', icon: Heart },
-                { id: 'performance', name: 'Performance', icon: TrendingUp },
+                { id: 'overview', name: 'Overview', icon: BarChart3, shortName: 'Overview' },
+                { id: 'views', name: 'Views & Stats', icon: Eye, shortName: 'Views' },
+                { id: 'interactions', name: 'Interactions', icon: Heart, shortName: 'Engage' },
+                { id: 'performance', name: 'Performance', icon: TrendingUp, shortName: 'Stats' },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
+                  className={`flex items-center justify-center gap-1 md:gap-2 py-3 px-2 md:px-4 rounded-lg font-medium text-xs md:text-sm transition-all duration-200 ${
                     activeTab === tab.id
-                      ? 'border-emerald-500 text-emerald-400'
-                      : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-300'
+                      ? 'bg-emerald-600 text-white shadow-lg transform scale-105'
+                      : 'text-slate-400 hover:text-slate-300 hover:bg-slate-700/50'
                   }`}
                 >
-                  <tab.icon className="h-4 w-4" />
-                  {tab.name}
+                  <tab.icon className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
+                  <span className="hidden md:inline">{tab.name}</span>
+                  <span className="md:hidden truncate">{tab.shortName}</span>
                 </button>
               ))}
             </nav>
@@ -229,11 +230,11 @@ const BlogAnalytics: React.FC = () => {
         {activeTab === 'overview' && (
           <>
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+            className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -254,7 +255,7 @@ const BlogAnalytics: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+            className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -275,7 +276,7 @@ const BlogAnalytics: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+            className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -297,7 +298,7 @@ const BlogAnalytics: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+            className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -315,13 +316,13 @@ const BlogAnalytics: React.FC = () => {
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           {/* Top Performing Posts */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+            className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
           >
             <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center">
               <TrendingUp className="h-5 w-5 mr-2 text-emerald-600" />
@@ -342,7 +343,7 @@ const BlogAnalytics: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-4 text-sm text-slate-400">
+                  <div className="flex items-center flex-wrap gap-2 md:space-x-4 text-sm text-slate-400">
                     <div className="flex items-center">
                       <Eye className="h-4 w-4 mr-1" />
                       {post.views || 0}
@@ -362,7 +363,7 @@ const BlogAnalytics: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+            className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
           >
             <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center">
               <BarChart3 className="h-5 w-5 mr-2 text-emerald-600" />
@@ -380,7 +381,7 @@ const BlogAnalytics: React.FC = () => {
                         {categoryData?.name || category}
                       </span>
                     </div>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center flex-wrap gap-2 md:space-x-3">
                       <div className="w-24 bg-slate-700 rounded-full h-2">
                         <div 
                           className={`h-2 rounded-full ${categoryData?.color || 'bg-slate-500'}`}
@@ -403,9 +404,9 @@ const BlogAnalytics: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="mt-8 bg-slate-800/50 rounded-xl p-6 shadow-lg"
+          className="mt-6 md:mt-8 bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
         >
-          <h3 className="text-lg font-semibold text-slate-200 mb-6 flex items-center">
+          <h3 className="text-lg font-semibold text-slate-200 mb-4 md:mb-6 flex items-center">
             <Calendar className="h-5 w-5 mr-2 text-emerald-600" />
             Recent Posts Activity
           </h3>
@@ -424,7 +425,7 @@ const BlogAnalytics: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center flex-wrap gap-1 md:space-x-2">
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                     post.status === 'published'
                       ? 'bg-emerald-900/30 text-emerald-400'
@@ -447,9 +448,9 @@ const BlogAnalytics: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="mt-8 bg-slate-800/50 rounded-xl p-6 shadow-lg"
+          className="mt-6 md:mt-8 bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
         >
-          <h3 className="text-lg font-semibold text-slate-200 mb-6 flex items-center">
+          <h3 className="text-lg font-semibold text-slate-200 mb-4 md:mb-6 flex items-center">
             <Users className="h-5 w-5 mr-2 text-emerald-600" />
             Engagement Breakdown
           </h3>
@@ -485,7 +486,7 @@ const BlogAnalytics: React.FC = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+                className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -506,7 +507,7 @@ const BlogAnalytics: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+                className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -526,7 +527,7 @@ const BlogAnalytics: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+                className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -550,7 +551,7 @@ const BlogAnalytics: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+              className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
             >
               <h3 className="text-lg font-semibold text-slate-200 mb-6 flex items-center">
                 <Eye className="h-5 w-5 mr-2 text-emerald-600" />
@@ -571,7 +572,7 @@ const BlogAnalytics: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-6 text-sm text-slate-400">
+                    <div className="flex items-center flex-wrap gap-2 md:space-x-6 text-sm text-slate-400">
                       <div className="flex items-center">
                         <Eye className="h-4 w-4 mr-1" />
                         {post.views || 0} views
@@ -596,7 +597,7 @@ const BlogAnalytics: React.FC = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+                className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
               >
                 <div className="text-center">
                   <Heart className="h-8 w-8 text-red-600 mx-auto mb-2" />
@@ -609,7 +610,7 @@ const BlogAnalytics: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+                className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
               >
                 <div className="text-center">
                   <Share2 className="h-8 w-8 text-blue-600 mx-auto mb-2" />
@@ -622,7 +623,7 @@ const BlogAnalytics: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+                className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
               >
                 <div className="text-center">
                   <MessageCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
@@ -635,7 +636,7 @@ const BlogAnalytics: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+                className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
               >
                 <div className="text-center">
                   <Users className="h-8 w-8 text-purple-600 mx-auto mb-2" />
@@ -652,7 +653,7 @@ const BlogAnalytics: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+              className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
             >
               <h3 className="text-lg font-semibold text-slate-200 mb-6 flex items-center">
                 <Heart className="h-5 w-5 mr-2 text-emerald-600" />
@@ -676,7 +677,7 @@ const BlogAnalytics: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4 text-sm text-slate-400">
+                      <div className="flex items-center flex-wrap gap-2 md:space-x-4 text-sm text-slate-400">
                         <div className="flex items-center">
                           <Heart className="h-4 w-4 mr-1" />
                           {post.likes || 0}
@@ -705,7 +706,7 @@ const BlogAnalytics: React.FC = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+                className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
               >
                 <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center">
                   <TrendingUp className="h-5 w-5 mr-2 text-emerald-600" />
@@ -737,7 +738,7 @@ const BlogAnalytics: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+                className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
               >
                 <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center">
                   <BarChart3 className="h-5 w-5 mr-2 text-emerald-600" />
@@ -755,7 +756,7 @@ const BlogAnalytics: React.FC = () => {
                             {categoryData?.name || category}
                           </span>
                         </div>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center flex-wrap gap-2 md:space-x-3">
                           <div className="w-20 bg-slate-700 rounded-full h-2">
                             <div 
                               className={`h-2 rounded-full ${categoryData?.color || 'bg-slate-500'}`}
@@ -778,7 +779,7 @@ const BlogAnalytics: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-slate-800/50 rounded-xl p-6 shadow-lg"
+              className="bg-slate-800/50 rounded-xl p-4 md:p-6 shadow-lg"
             >
               <h3 className="text-lg font-semibold text-slate-200 mb-6 flex items-center">
                 <Calendar className="h-5 w-5 mr-2 text-emerald-600" />
@@ -799,7 +800,7 @@ const BlogAnalytics: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center flex-wrap gap-1 md:space-x-2">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                         post.status === 'published'
                           ? 'bg-emerald-900/30 text-emerald-400'
