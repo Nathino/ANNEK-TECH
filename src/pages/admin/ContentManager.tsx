@@ -31,7 +31,7 @@ interface ContentItem {
       image: string;
       technologies: string[];
       liveUrl: string;
-      githubUrl: string;
+      demoUrl?: string;
     }>;
     
     // Featured Partners

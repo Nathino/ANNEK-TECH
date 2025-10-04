@@ -1,25 +1,54 @@
-import React, { useState } from 'react';
-import { Phone, Mail, MapPin, Facebook, Instagram, Send, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Phone, Mail, MapPin, Facebook, Instagram, Send, Loader2, Users } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import toast from 'react-hot-toast';
+import { useSearchParams } from 'react-router-dom';
+import BecomePartner from '../components/BecomePartner';
 
 interface ContactFormData {
   name: string;
   email: string;
+  phone: string;
+  product: string;
   subject: string;
   message: string;
 }
 
 const Contact: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
+    phone: '',
+    product: '',
     subject: '',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
+
+  // Handle demo booking parameters
+  useEffect(() => {
+    const product = searchParams.get('product');
+    const isDemo = searchParams.get('demo');
+    
+    if (product) {
+      setFormData(prev => ({
+        ...prev,
+        product: product
+      }));
+    }
+    
+    if (isDemo === 'true') {
+      setFormData(prev => ({
+        ...prev,
+        subject: `Demo Session Request - ${product || 'Product'}`,
+        message: `Hi, I'm interested in booking a demo session for ${product || 'your product'}. Please let me know your available times and how we can proceed.`
+      }));
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +67,8 @@ const Contact: React.FC = () => {
       setFormData({
         name: '',
         email: '',
+        phone: '',
+        product: '',
         subject: '',
         message: ''
       });
@@ -49,7 +80,7 @@ const Contact: React.FC = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -240,6 +271,47 @@ const Contact: React.FC = () => {
                   </div>
                 </div>
                 <div className="group">
+                  <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 transition-colors group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="+233 24 123 4567"
+                    className="block w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition-all duration-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/20 placeholder:text-slate-400 dark:placeholder:text-slate-500 hover:border-slate-300 dark:hover:border-slate-600"
+                  />
+                </div>
+                <div className="group">
+                  <label htmlFor="product" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 transition-colors group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400">
+                    Product/Service Interest
+                  </label>
+                  <select
+                    id="product"
+                    value={formData.product}
+                    onChange={handleChange}
+                    className="block w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition-all duration-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/20 hover:border-slate-300 dark:hover:border-slate-600"
+                  >
+                    <option value="">Select a product/service</option>
+                    <option value="SALES MONITOR">SALES MONITOR</option>
+                    <option value="THE WELFARE">THE WELFARE</option>
+                    <option value="AGROPAL GHANA">AGROPAL GHANA</option>
+                    <option value="ECO-GHANA">ECO-GHANA</option>
+                    <option value="HQ DOWNLOADER">HQ DOWNLOADER</option>
+                    <option value="ORTHYS">ORTHYS</option>
+                    <option value="TRACK FOOD GH">TRACK FOOD GH</option>
+                    <option value="GRADE IT">GRADE IT</option>
+                    <option value="STORY VIBEZ">STORY VIBEZ</option>
+                    <option value="ULTIMATE QR CODE">ULTIMATE QR CODE</option>
+                    <option value="Custom Web Development">Custom Web Development</option>
+                    <option value="Mobile App Development">Mobile App Development</option>
+                    <option value="E-Commerce Solutions">E-Commerce Solutions</option>
+                    <option value="Enterprise Solutions">Enterprise Solutions</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className="group">
                   <label htmlFor="subject" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 transition-colors group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400">
                     Subject
                   </label>
@@ -273,7 +345,7 @@ const Contact: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="pt-4">
+                <div className="pt-4 space-y-4">
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -291,12 +363,40 @@ const Contact: React.FC = () => {
                       </>
                     )}
                   </button>
+                  
+                  {/* Divider */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-slate-200 dark:border-slate-700" />
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-4 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400">or</span>
+                    </div>
+                  </div>
+                  
+                  {/* Partner Button */}
+                  <div id="partner">
+                    <button
+                      type="button"
+                      onClick={() => setIsPartnerModalOpen(true)}
+                      className="w-full bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-3 group"
+                    >
+                      <Users className="h-5 w-5" />
+                      <span>Become Our Partner</span>
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Become Partner Modal */}
+      <BecomePartner 
+        isOpen={isPartnerModalOpen} 
+        onClose={() => setIsPartnerModalOpen(false)} 
+      />
     </div>
   );
 };

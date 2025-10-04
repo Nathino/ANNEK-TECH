@@ -68,62 +68,127 @@ const FeaturedPartners: React.FC = () => {
   }
 
   return (
-    <section className="py-20 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+    <motion.section 
+      className="py-16 md:py-24 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative overflow-hidden"
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.2 }}
+      viewport={{ once: true, amount: 0.3 }}
+    >
+      {/* Background Decorations */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-cyan-400/20 to-emerald-400/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-teal-400/10 to-emerald-400/10 rounded-full blur-3xl" />
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <motion.div 
+          className="text-center max-w-4xl mx-auto mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <div className="inline-block mb-6">
+            <span className="px-4 py-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 rounded-full border border-emerald-200 dark:border-emerald-800">
+              Trusted Partnerships
+            </span>
+          </div>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent leading-tight">
             {content.title}
           </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-400">
+          <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl mx-auto">
             {content.description}
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-12">
           {content.partners.map((partner, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.2 }}
-              className="group relative flex flex-col h-full"
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ 
+                delay: index * 0.15,
+                duration: 0.6,
+                type: "spring",
+                stiffness: 100
+              }}
+              viewport={{ once: true, amount: 0.3 }}
+              className="group relative"
             >
-              <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-800 shadow-lg hover:shadow-xl transition-all duration-300 h-full">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 transform origin-left transition-transform duration-300 group-hover:scale-x-100" />
+              <div className="relative overflow-hidden rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-2xl hover:shadow-emerald-500/20 dark:hover:shadow-emerald-400/20 transition-all duration-500 hover:scale-105 border border-white/20 dark:border-slate-700/50 h-full">
+                {/* Animated gradient border */}
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl p-[2px]">
+                  <div className="w-full h-full bg-white/90 dark:bg-slate-800/90 rounded-2xl" />
+                </div>
                 
-                <div className="p-6 lg:p-8 flex flex-col h-full">
-                  <div className="text-center mb-4">
-                    <span className="inline-block px-3 py-1 text-sm rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                {/* Content */}
+                <div className="relative p-8 lg:p-10 flex flex-col h-full">
+                  {/* Category Badge */}
+                  <div className="text-center mb-6">
+                    <span className="inline-block px-4 py-2 text-sm font-bold rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">
                       {partner.category}
                     </span>
                   </div>
 
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 mx-auto mb-6 transform transition-transform duration-300 group-hover:scale-110">
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl" />
-                    <img
-                      src={partner.logo}
-                      alt={partner.name}
-                      className="relative w-full h-full object-contain p-3"
-                    />
+                  {/* Logo Container */}
+                  <div className="relative w-24 h-24 md:w-28 md:h-28 mx-auto mb-8">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 rounded-2xl transform rotate-3 group-hover:rotate-6 transition-transform duration-500" />
+                    <div className="absolute inset-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg flex items-center justify-center">
+                      <img
+                        src={partner.logo}
+                        alt={partner.name}
+                        className="w-16 h-16 object-contain p-2 transform group-hover:scale-110 transition-transform duration-300"
+                      />
+                    </div>
                   </div>
 
+                  {/* Content */}
                   <div className="text-center flex-grow flex flex-col justify-between">
-                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">
-                      {partner.name}
-                    </h3>
-                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {partner.description}
-                    </p>
+                    <div>
+                      <h3 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        {partner.name}
+                      </h3>
+                      <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-lg">
+                        {partner.description}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                  {/* Hover Effect Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/5 via-transparent to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl" />
+                  
+                  {/* Floating particles effect */}
+                  <div className="absolute top-4 right-4 w-2 h-2 bg-emerald-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-500" />
+                  <div className="absolute bottom-4 left-4 w-1.5 h-1.5 bg-teal-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-700" />
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
+
+        {/* Call to Action */}
+        <motion.div 
+          className="text-center mt-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <a 
+            href="/contact#partner"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer"
+          >
+            <span>Become Our Partner</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 };
 

@@ -7,6 +7,7 @@ import ContentEdit from '../pages/admin/ContentEdit';
 import MediaManager from '../pages/admin/MediaManager';
 import Settings from '../pages/admin/Settings';
 import SEOMonitor from '../pages/admin/SEOMonitor';
+import PartnerSubmissions from '../pages/admin/PartnerSubmissions';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 const AdminRoutes: React.FC = () => {
@@ -58,6 +59,14 @@ const AdminRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <SEOMonitor />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="partners"
+        element={
+          <ProtectedRoute>
+            <PartnerSubmissions />
           </ProtectedRoute>
         }
       />

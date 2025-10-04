@@ -149,13 +149,21 @@ const Home: React.FC = () => {
         }}
       />
       {/* Hero Section */}
-      <section className="relative min-h-[50vh] md:min-h-[60vh] lg:min-h-[70vh] flex items-center">
+      <motion.section 
+        className="relative min-h-[50vh] md:min-h-[60vh] lg:min-h-[70vh] flex items-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-emerald-900/90 to-slate-900/95" />
-          <img
+          <motion.img
             src={content.heroImage || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80"}
             alt="Tech Background"
             className="w-full h-full object-cover"
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
           />
         </div>
         
@@ -314,22 +322,41 @@ const Home: React.FC = () => {
             <ChevronDown className="h-6 w-6" />
           </motion.div>
         </motion.div>
-      </section>
+      </motion.section>
 
       {/* Services Section */}
-      <section className="py-20 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
+      <motion.section 
+        className="py-20 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        viewport={{ once: true, amount: 0.3 }}
+      >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <motion.div 
+            className="text-center max-w-3xl mx-auto mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            viewport={{ once: true, amount: 0.5 }}
+          >
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
               Our Services
             </h2>
-            <div className="h-1 w-20 bg-gradient-to-r from-emerald-500 to-teal-500 mx-auto mb-6"></div>
+            <motion.div 
+              className="h-1 w-20 bg-gradient-to-r from-emerald-500 to-teal-500 mx-auto mb-6"
+              initial={{ width: 0 }}
+              whileInView={{ width: 80 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              viewport={{ once: true, amount: 0.5 }}
+            ></motion.div>
             <p className="text-lg text-slate-600 dark:text-slate-400">
               Comprehensive solutions tailored to your business needs
             </p>
-          </div>
+          </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
+          {/* Desktop Grid View */}
+          <div className="hidden md:grid grid-cols-3 gap-8 px-4">
             {(content.services || [
               {
                 icon: 'code',
@@ -346,38 +373,139 @@ const Home: React.FC = () => {
                 title: "Digital Transformation",
                 description: "Strategic technology implementation to modernize operations and enhance customer experiences in the digital age."
               }
-            ]).map((service, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.2 }}
-                className="bg-white dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700/50 p-8 hover:shadow-xl transition-all duration-300 hover:border-emerald-200 dark:hover:border-emerald-800/50 group"
-              >
-                <div className="flex flex-col items-center text-center">
-                  <div className="h-20 w-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-6 flex items-center justify-center shadow-md group-hover:shadow-emerald-200/30 dark:group-hover:shadow-emerald-700/30 transition-all duration-300 group-hover:scale-110">
-                    <div className="text-emerald-600 dark:text-emerald-400">
-                      {getIconComponent(service.icon)}
+            ]).map((service, index) => {
+              const colors = [
+                { bg: 'bg-emerald-500', text: 'text-emerald-600', light: 'bg-emerald-100', dark: 'bg-emerald-900/30' },
+                { bg: 'bg-teal-500', text: 'text-teal-600', light: 'bg-teal-100', dark: 'bg-teal-900/30' },
+                { bg: 'bg-cyan-500', text: 'text-cyan-600', light: 'bg-cyan-100', dark: 'bg-cyan-900/30' }
+              ];
+              const color = colors[index];
+              
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.2, duration: 0.6 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  className="group relative"
+                >
+                  <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border-2 border-slate-200 dark:border-slate-700 p-8 hover:shadow-2xl hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300 h-full">
+                    <div className="flex flex-col items-center text-center h-full">
+                      {/* Icon container */}
+                      <div className={`w-20 h-20 ${color.light} dark:${color.dark} rounded-2xl mb-6 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
+                        <div className={color.text}>
+                          {getIconComponent(service.icon)}
+                        </div>
+                      </div>
+                      
+                      {/* Title */}
+                      <h3 className={`text-2xl font-bold mb-4 ${color.text} group-hover:scale-105 transition-transform duration-300`}>
+                        {service.title}
+                      </h3>
+                      
+                      {/* Description */}
+                      <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-center flex-grow">
+                        {service.description}
+                      </p>
                     </div>
                   </div>
-                  <h3 className="text-2xl font-semibold mb-3 text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                    {service.title}
-                  </h3>
-                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                    {service.description}
-                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Mobile Horizontal Scroll View */}
+          <div className="md:hidden">
+            <div className="relative">
+              <div className="flex overflow-x-auto scrollbar-hide gap-4 px-4 pb-4 snap-x snap-mandatory scroll-smooth">
+              {(content.services || [
+                {
+                  icon: 'code',
+                  title: "Web Development",
+                  description: "Custom web applications built with modern technologies that deliver exceptional user experiences and drive business results."
+                },
+                {
+                  icon: 'server',
+                  title: "Enterprise Solutions",
+                  description: "Scalable software infrastructure for growing businesses with secure cloud architecture and robust backend systems."
+                },
+                {
+                  icon: 'chart',
+                  title: "Digital Transformation",
+                  description: "Strategic technology implementation to modernize operations and enhance customer experiences in the digital age."
+                }
+              ]).map((service, index) => {
+                const colors = [
+                  { bg: 'bg-emerald-500', text: 'text-emerald-600', light: 'bg-emerald-100', dark: 'bg-emerald-900/30' },
+                  { bg: 'bg-teal-500', text: 'text-teal-600', light: 'bg-teal-100', dark: 'bg-teal-900/30' },
+                  { bg: 'bg-cyan-500', text: 'text-cyan-600', light: 'bg-cyan-100', dark: 'bg-cyan-900/30' }
+                ];
+                const color = colors[index];
+                
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    className="flex-shrink-0 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-lg border-2 border-slate-200 dark:border-slate-700 p-6 hover:shadow-xl hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300 group snap-center"
+                  >
+                    <div className="flex flex-col items-center text-center h-full">
+                      {/* Icon container */}
+                      <div className={`w-16 h-16 ${color.light} dark:${color.dark} rounded-xl mb-4 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110`}>
+                        <div className={color.text}>
+                          {getIconComponent(service.icon)}
+                        </div>
+                      </div>
+                      
+                      {/* Title */}
+                      <h3 className={`text-lg font-bold mb-3 ${color.text} group-hover:scale-105 transition-transform duration-300`}>
+                        {service.title}
+                      </h3>
+                      
+                      {/* Description */}
+                      <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed text-center flex-grow">
+                        {service.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+              </div>
+              {/* Scroll indicator */}
+              <div className="flex justify-center mt-4">
+                <div className="flex space-x-2">
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg"></div>
+                  <div className="w-3 h-3 bg-teal-500 rounded-full animate-pulse shadow-lg" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-3 h-3 bg-cyan-500 rounded-full animate-pulse shadow-lg" style={{ animationDelay: '0.4s' }}></div>
                 </div>
-              </motion.div>
-            ))}
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Project Showcase */}
-      <ProjectSlider />
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true, amount: 0.2 }}
+      >
+        <ProjectSlider />
+      </motion.div>
 
       {/* Featured Partners */}
-      <FeaturedPartners />
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true, amount: 0.2 }}
+      >
+        <FeaturedPartners />
+      </motion.div>
     </div>
   );
 }

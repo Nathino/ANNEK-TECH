@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, UserCircle, Settings, LogOut } from 'lucide-react';
+import { Menu, UserCircle, Settings, LogOut } from 'lucide-react';
 
 interface AdminNavbarProps {
   onToggleSidebar: () => void;

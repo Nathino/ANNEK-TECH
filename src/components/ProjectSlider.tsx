@@ -37,7 +37,13 @@ const projects = [
 
 const ProjectSlider: React.FC = () => {
   return (
-    <section className="py-20 bg-white dark:bg-slate-900">
+    <motion.section 
+      className="py-20 bg-white dark:bg-slate-900"
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.2 }}
+      viewport={{ once: true, amount: 0.3 }}
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center mb-12">
           <div className="mb-6 md:mb-0">
@@ -53,7 +59,8 @@ const ProjectSlider: React.FC = () => {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Desktop Grid View */}
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-8">
           {projects.map((project, index) => (
             <motion.div
               key={index}
@@ -94,8 +101,64 @@ const ProjectSlider: React.FC = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Mobile Horizontal Scroll View */}
+        <div className="md:hidden">
+          <div className="relative">
+            <div className="flex overflow-x-auto scrollbar-hide gap-4 px-4 pb-4 snap-x snap-mandatory scroll-smooth">
+              {projects.map((project, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="flex-shrink-0 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700/50 overflow-hidden group hover:shadow-xl transition-all duration-300 hover:border-emerald-200 dark:hover:border-emerald-800/50 snap-center"
+                >
+                  <div className="relative h-40 overflow-hidden">
+                    <img
+                      src={project.image}
+                      alt={project.title}
+                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="h-6 w-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shadow-inner text-emerald-600 dark:text-emerald-400">
+                        {project.icon}
+                      </div>
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        {project.title}
+                      </h3>
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-300 mb-3">
+                      {project.description}
+                    </p>
+                    <a 
+                      href={project.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 flex items-center gap-1"
+                    >
+                      View Project <ArrowRight className="h-3 w-3" />
+                    </a>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+            {/* Scroll indicator */}
+            <div className="flex justify-center mt-2">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-slate-300 dark:bg-slate-600 rounded-full"></div>
+                <div className="w-2 h-2 bg-slate-300 dark:bg-slate-600 rounded-full"></div>
+                <div className="w-2 h-2 bg-slate-300 dark:bg-slate-600 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
+    </motion.section>
   );
 };
 

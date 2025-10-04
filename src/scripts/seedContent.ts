@@ -118,7 +118,7 @@ const content = [
     section: 'header',
     content: {
       title: 'Our Portfolio',
-      description: "Explore our latest projects and see how we've helped businesses transform their digital presence."
+      description: "Discover our innovative solutions and successful projects that have transformed businesses across Ghana and beyond. From e-commerce platforms to agricultural technology, see how ANNEK TECH delivers cutting-edge digital solutions."
     },
     status: 'published',
     lastModified: new Date().toISOString()
@@ -133,36 +133,86 @@ const content = [
     content: {
       projects: [
         {
-          title: 'E-Commerce Platform',
-          description: 'A full-featured online shopping platform with advanced features including real-time inventory management, secure payment processing, and an intuitive admin dashboard.',
-          image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&q=80',
-          technologies: ['React', 'Node.js', 'MongoDB', 'Stripe'],
-          liveUrl: '#',
-          githubUrl: '#'
+          title: 'SALES MONITOR',
+          description: 'A comprehensive sales tracking system for businesses to monitor transactions, inventory, and customer relationships in real-time with analytics dashboards.',
+          image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80',
+          technologies: [],
+          liveUrl: 'https://mysalesmonitor.web.app',
+          icon: 'ShoppingCart',
+          demoUrl: '/contact?product=SALES MONITOR&demo=true'
         },
         {
-          title: 'Healthcare Management System',
-          description: 'Comprehensive healthcare solution for medical facilities featuring patient records management, appointment scheduling, and billing integration.',
-          image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80',
-          technologies: ['React', 'Firebase', 'Material-UI', 'Node.js'],
-          liveUrl: '#',
-          githubUrl: '#'
+          title: 'THE WELFARE',
+          description: 'A welfare platform designed to help manage community support, donations, and charitable initiatives with easy tracking of funds and beneficiaries.',
+          image: 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&q=80',
+          technologies: [],
+          liveUrl: 'https://the-welfare.web.app/',
+          icon: 'Users'
         },
         {
-          title: 'Educational Platform',
-          description: 'Interactive learning management system with video conferencing, course creation tools, and progress tracking for students and educators.',
-          image: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80',
-          technologies: ['React', 'WebRTC', 'Express', 'PostgreSQL'],
-          liveUrl: '#',
-          githubUrl: '#'
+          title: 'AGROPAL GHANA',
+          description: 'An integrated agricultural platform connecting farmers with expert advice, local markets and agricultural inputs. Features include crop tracking, seasonal planning, and pest management tools for Ghanaian farmers.',
+          image: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&q=80',
+          technologies: [],
+          liveUrl: 'https://agropalgh.web.app',
+          icon: 'Leaf'
         },
         {
-          title: 'Real Estate Management',
-          description: 'Property management platform with virtual tours, automated rental processes, and maintenance request tracking.',
-          image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80',
-          technologies: ['React', 'Next.js', 'Supabase', 'Tailwind'],
+          title: 'ECO-GHANA',
+          description: 'A comprehensive environmental platform that educates Ghanaians on sustainable practices, tracks local conservation efforts, and connects eco-conscious communities. Features waste management resources and climate change awareness tools.',
+          image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80',
+          technologies: [],
+          liveUrl: 'https://eco-ghana.web.app',
+          icon: 'Recycle'
+        },
+        {
+          title: 'HQ DOWNLOADER',
+          description: 'A powerful web application that allows users to download high-quality media content from various platforms with format conversion options.',
+          image: 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?auto=format&fit=crop&q=80',
+          technologies: [],
+          liveUrl: 'https://hq-downloader.web.app/',
+          icon: 'Download'
+        },
+        {
+          title: 'ORTHYS',
+          description: 'A comprehensive business management suite designed for shops, restaurants, and hotels. Features include inventory management, staff scheduling, customer tracking, and financial reporting.',
+          image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80',
+          technologies: [],
+          liveUrl: 'https://food-hub-b8e39.web.app',
+          icon: 'Utensils',
+          demoUrl: '/contact?product=ORTHYS&demo=true'
+        },
+        {
+          title: 'TRACK FOOD GH',
+          description: 'A comprehensive system for tracking food supplies in schools across Ghana, ensuring proper distribution and inventory management of school feeding programs.',
+          image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80',
+          technologies: [],
           liveUrl: '#',
-          githubUrl: '#'
+          icon: 'Utensils'
+        },
+        {
+          title: 'GRADE IT',
+          description: 'An advanced school grading system designed for comprehensive assessment record keeping, grade calculation, and academic performance tracking in educational institutions.',
+          image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80',
+          technologies: [],
+          liveUrl: '#',
+          icon: 'BookOpen'
+        },
+        {
+          title: 'STORY VIBEZ',
+          description: 'An interactive storytelling platform where users can create, share, and explore captivating stories with rich media integration and community engagement.',
+          image: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&q=80',
+          technologies: [],
+          liveUrl: 'https://story-vibez.web.app/',
+          icon: 'BookOpen'
+        },
+        {
+          title: 'ULTIMATE QR CODE',
+          description: 'A QR code generator and scanner with advanced customization options, analytics, and business integration capabilities for marketing and inventory management.',
+          image: 'https://images.unsplash.com/photo-1598291286794-d417e2685f85?auto=format&fit=crop&q=80',
+          technologies: [],
+          liveUrl: 'https://ultimateqrcode.web.app/',
+          icon: 'QrCode'
         }
       ]
     },
