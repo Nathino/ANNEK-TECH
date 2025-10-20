@@ -6,6 +6,8 @@ import SEOHead from '../components/SEOHead';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import toast from 'react-hot-toast';
+import PersonalizedSuggestions from '../components/PersonalizedSuggestions';
+import { optimizeImageUrl, FALLBACK_IMAGE } from '../utils/imageUtils';
 
 interface BlogPost {
   id: string;
@@ -387,9 +389,14 @@ const Blog: React.FC = () => {
                         <Link to={`/blog/${post.id}`} className="block">
                           <div className="relative h-48 overflow-hidden">
                             <img
-                              src={post.content.featuredImage || "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80"}
+                              src={optimizeImageUrl(post.content.featuredImage || FALLBACK_IMAGE, 400, 300)}
                               alt={post.title}
                               className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                              loading="lazy"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = FALLBACK_IMAGE;
+                              }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             <div className="absolute top-4 right-4">
@@ -482,9 +489,14 @@ const Blog: React.FC = () => {
                     {/* Featured Image */}
                     <div className="relative h-64 overflow-hidden">
                       <img
-                        src={post.content.featuredImage || "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80"}
+                        src={optimizeImageUrl(post.content.featuredImage || FALLBACK_IMAGE, 600, 400)}
                         alt={post.title}
                         className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = FALLBACK_IMAGE;
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <div className="absolute top-4 left-4">
@@ -551,6 +563,20 @@ const Blog: React.FC = () => {
             </div>
           )
         )}
+
+        {/* Personalized Suggestions */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="mt-16"
+        >
+          <PersonalizedSuggestions 
+            title="Recommended for You" 
+            maxPosts={6}
+            showReasons={true}
+          />
+        </motion.div>
       </div>
     </div>
   );

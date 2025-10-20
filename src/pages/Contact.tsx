@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Phone, Mail, MapPin, Facebook, Instagram, Send, Loader2, Users } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Instagram, Linkedin, Send, Loader2, Users } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -228,6 +228,13 @@ const Contact: React.FC = () => {
                   <Instagram className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500 group-hover:text-emerald-400 transition-colors" />
                   Instagram
                 </a>
+                <a 
+                  href="https://linkedin.com/company/annektech" 
+                  className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group text-sm sm:text-base"
+                >
+                  <Linkedin className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500 group-hover:text-emerald-400 transition-colors" />
+                  LinkedIn
+                </a>
               </div>
             </div>
           </div>
@@ -294,16 +301,6 @@ const Contact: React.FC = () => {
                     className="block w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition-all duration-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/20 hover:border-slate-300 dark:hover:border-slate-600"
                   >
                     <option value="">Select a product/service</option>
-                    <option value="SALES MONITOR">SALES MONITOR</option>
-                    <option value="THE WELFARE">THE WELFARE</option>
-                    <option value="AGROPAL GHANA">AGROPAL GHANA</option>
-                    <option value="ECO-GHANA">ECO-GHANA</option>
-                    <option value="HQ DOWNLOADER">HQ DOWNLOADER</option>
-                    <option value="ORTHYS">ORTHYS</option>
-                    <option value="TRACK FOOD GH">TRACK FOOD GH</option>
-                    <option value="GRADE IT">GRADE IT</option>
-                    <option value="STORY VIBEZ">STORY VIBEZ</option>
-                    <option value="ULTIMATE QR CODE">ULTIMATE QR CODE</option>
                     <option value="Custom Web Development">Custom Web Development</option>
                     <option value="Mobile App Development">Mobile App Development</option>
                     <option value="E-Commerce Solutions">E-Commerce Solutions</option>

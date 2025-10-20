@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Edit, Trash, Plus, Eye } from 'lucide-react';
+import { Edit, Trash, Plus, Eye, Folder, ExternalLink, ShoppingCart, Leaf, Recycle, Download, Users, Building2, Utensils, QrCode } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { db } from '../../lib/firebase';
 import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
@@ -86,6 +86,23 @@ const ContentManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState('all');
   const [selectedSection, setSelectedSection] = useState('all');
+  const [showProjectsOverview, setShowProjectsOverview] = useState(false);
+  const [showBlogsOverview, setShowBlogsOverview] = useState(false);
+
+  // Function to get icon component
+  const getIconComponent = (iconName: string) => {
+    switch (iconName) {
+      case 'ShoppingCart': return <ShoppingCart className="h-5 w-5" />;
+      case 'Users': return <Users className="h-5 w-5" />;
+      case 'Building2': return <Building2 className="h-5 w-5" />;
+      case 'Leaf': return <Leaf className="h-5 w-5" />;
+      case 'Recycle': return <Recycle className="h-5 w-5" />;
+      case 'Download': return <Download className="h-5 w-5" />;
+      case 'Utensils': return <Utensils className="h-5 w-5" />;
+      case 'QrCode': return <QrCode className="h-5 w-5" />;
+      default: return <ExternalLink className="h-5 w-5" />;
+    }
+  };
 
   useEffect(() => {
     fetchContent();
@@ -146,7 +163,7 @@ const ContentManager: React.FC = () => {
   const getSections = (type: string) => {
     switch(type) {
       case 'home':
-        return ['hero', 'services', 'projects', 'partners'];
+        return ['hero', 'services', 'featured-projects', 'featured-partners'];
       case 'portfolio':
         return ['header', 'projects'];
       case 'contact':
@@ -158,6 +175,78 @@ const ContentManager: React.FC = () => {
     }
   };
 
+  // Extract all projects from content
+  const getAllProjects = () => {
+    const allProjects: Array<{
+      id: string;
+      title: string;
+      description: string;
+      image: string;
+      icon: string;
+      url: string;
+      source: string;
+      section: string;
+      demoCredentials?: {
+        email: string;
+        password: string;
+        instructions?: string;
+      };
+    }> = [];
+
+    content.forEach(item => {
+      if (item.content.projects && Array.isArray(item.content.projects)) {
+        item.content.projects.forEach((project: any) => {
+          allProjects.push({
+            id: `${item.id}-${project.title}`,
+            title: project.title,
+            description: project.description,
+            image: project.image,
+            icon: project.icon || 'ExternalLink',
+            url: project.url || project.liveUrl,
+            source: item.type,
+            section: item.section,
+            demoCredentials: project.demoCredentials
+          });
+        });
+      }
+    });
+
+    return allProjects;
+  };
+
+  // Extract all blogs from content
+  const getAllBlogs = () => {
+    const allBlogs: Array<{
+      id: string;
+      title: string;
+      excerpt: string;
+      featuredImage: string;
+      author: string;
+      readTime: number;
+      category: string;
+      status: string;
+      lastModified: string;
+    }> = [];
+
+    content.forEach(item => {
+      if (item.type === 'blog' && item.content) {
+        allBlogs.push({
+          id: item.id,
+          title: item.title,
+          excerpt: item.content.excerpt || '',
+          featuredImage: item.content.featuredImage || '',
+          author: item.content.author || 'ANNEK TECH',
+          readTime: item.content.readTime || 5,
+          category: (item.content as any).category || 'general',
+          status: item.status,
+          lastModified: item.lastModified
+        });
+      }
+    });
+
+    return allBlogs;
+  };
+
   return (
     <div className="p-3 pt-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-4">
@@ -165,6 +254,29 @@ const ContentManager: React.FC = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-emerald-400">Content Manager</h1>
           <p className="text-slate-400 mt-0.5 text-sm md:text-base">Manage your website content</p>
         </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowProjectsOverview(!showProjectsOverview)}
+            className={`flex items-center px-3 md:px-4 py-2 md:py-2.5 rounded-lg transition-colors text-sm md:text-base ${
+              showProjectsOverview 
+                ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            }`}
+          >
+            <Folder className="w-4 h-4 md:w-5 md:h-5 mr-1.5" />
+            {showProjectsOverview ? 'Hide Projects' : 'View Projects'}
+          </button>
+          <button
+            onClick={() => setShowBlogsOverview(!showBlogsOverview)}
+            className={`flex items-center px-3 md:px-4 py-2 md:py-2.5 rounded-lg transition-colors text-sm md:text-base ${
+              showBlogsOverview 
+                ? 'bg-purple-500 text-white hover:bg-purple-600' 
+                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            }`}
+          >
+            <Folder className="w-4 h-4 md:w-5 md:h-5 mr-1.5" />
+            {showBlogsOverview ? 'Hide Blogs' : 'View Blogs'}
+          </button>
         <button
           onClick={() => navigate('/admin/content/new')}
           className="flex items-center px-3 md:px-4 py-2 md:py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors text-sm md:text-base"
@@ -172,6 +284,7 @@ const ContentManager: React.FC = () => {
           <Plus className="w-4 h-4 md:w-5 md:h-5 mr-1.5" />
           Add New Content
         </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -205,64 +318,272 @@ const ContentManager: React.FC = () => {
         </select>
       </div>
 
-      {/* Content Table */}
+      {/* Projects Overview */}
+      {showProjectsOverview && (
+        <div className="mb-6 md:mb-8">
+          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl p-4 md:p-6 border border-blue-500/20">
+            <h2 className="text-lg md:text-xl font-semibold text-slate-200 mb-4 flex items-center gap-2">
+              <Folder className="h-5 w-5" />
+              Projects Overview
+            </h2>
+            {(() => {
+              const allProjects = getAllProjects();
+              if (allProjects.length === 0) {
+                return (
+                  <div className="text-center py-8">
+                    <div className="text-slate-400 text-lg mb-2">No projects found</div>
+                    <p className="text-slate-500 text-sm">Create some projects to see them here</p>
+                  </div>
+                );
+              }
+              
+              // Group projects by source
+              const groupedProjects = allProjects.reduce((acc, project) => {
+                if (!acc[project.source]) {
+                  acc[project.source] = [];
+                }
+                acc[project.source].push(project);
+                return acc;
+              }, {} as Record<string, typeof allProjects>);
+
+              return (
+                <div className="space-y-6">
+                  {Object.entries(groupedProjects).map(([source, projects]) => (
+                    <div key={source}>
+                      <h3 className="text-md font-medium text-slate-300 mb-3 capitalize">
+                        {source} Projects ({projects.length})
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+                        {projects.map((project) => (
+                          <div
+                            key={project.id}
+                            className="bg-slate-800/50 rounded-lg p-3 md:p-4 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-200 hover:shadow-lg group"
+                          >
+                            {/* Project Image */}
+                            <div className="relative h-24 md:h-28 mb-3 rounded-lg overflow-hidden">
+                              <img
+                                src={project.image}
+                                alt={project.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80';
+                                }}
+                              />
+                              <div className="absolute top-2 right-2">
+                                <div className="h-6 w-6 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-300">
+                                  {getIconComponent(project.icon)}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Project Info */}
+                            <div className="space-y-2">
+                              <h4 className="text-sm md:text-base font-semibold text-slate-200 line-clamp-1">
+                                {project.title}
+                              </h4>
+                              <p className="text-xs text-slate-400 line-clamp-2">
+                                {project.description}
+                              </p>
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-slate-500 capitalize">
+                                  {project.section}
+                                </span>
+                                {project.demoCredentials?.email && (
+                                  <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full">
+                                    Demo Available
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="mt-3 flex gap-2">
+                              <button
+                                onClick={() => window.open(project.url, '_blank', 'noopener,noreferrer')}
+                                className="flex-1 flex items-center justify-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 py-2 px-3 rounded-lg transition-colors"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                                View
+                              </button>
+                              <button
+                                onClick={() => {
+                                  // Find the parent content item and navigate to edit
+                                  const parentItem = content.find(item => 
+                                    item.content.projects?.some((p: any) => p.title === project.title)
+                                  );
+                                  if (parentItem) {
+                                    navigate(`/admin/content/edit/${parentItem.id}`);
+                                  }
+                                }}
+                                className="flex-1 flex items-center justify-center gap-1 text-xs text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 py-2 px-3 rounded-lg transition-colors"
+                              >
+                                <Edit className="h-3 w-3" />
+                                Edit
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* Blogs Overview */}
+      {showBlogsOverview && (
+        <div className="mb-6 md:mb-8">
+          <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-4 md:p-6 border border-purple-500/20">
+            <h2 className="text-lg md:text-xl font-semibold text-slate-200 mb-4 flex items-center gap-2">
+              <Folder className="h-5 w-5" />
+              Blogs Overview
+            </h2>
+            {(() => {
+              const allBlogs = getAllBlogs();
+              if (allBlogs.length === 0) {
+                return (
+                  <div className="text-center py-8">
+                    <div className="text-slate-400 text-lg mb-2">No blogs found</div>
+                    <p className="text-slate-500 text-sm">Create some blog posts to see them here</p>
+                  </div>
+                );
+              }
+              
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                  {allBlogs.map((blog) => (
+                    <div
+                      key={blog.id}
+                      className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-200 hover:shadow-lg group"
+                    >
+                      {/* Blog Image */}
+                      <div className="relative h-32 mb-3 rounded-lg overflow-hidden">
+                        <img
+                          src={blog.featuredImage}
+                          alt={blog.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80';
+                          }}
+                        />
+                        <div className="absolute top-2 right-2">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            blog.status === 'published' 
+                              ? 'bg-emerald-500/20 text-emerald-400' 
+                              : 'bg-slate-500/20 text-slate-400'
+                          }`}>
+                            {blog.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Blog Info */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm md:text-base font-semibold text-slate-200 line-clamp-2">
+                          {blog.title}
+                        </h4>
+                        <p className="text-xs text-slate-400 line-clamp-2">
+                          {blog.excerpt}
+                        </p>
+                        <div className="flex items-center justify-between text-xs text-slate-500">
+                          <span className="capitalize">{blog.category}</span>
+                          <span>{blog.readTime} min read</span>
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          By {blog.author} • {new Date(blog.lastModified).toLocaleDateString()}
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={() => navigate(`/admin/content/edit/${blog.id}`)}
+                          className="flex-1 flex items-center justify-center gap-1 text-xs text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 py-2 px-3 rounded-lg transition-colors"
+                        >
+                          <Edit className="h-3 w-3" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => window.open(`/blog/${blog.id}`, '_blank', 'noopener,noreferrer')}
+                          className="flex-1 flex items-center justify-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 py-2 px-3 rounded-lg transition-colors"
+                        >
+                          <Eye className="h-3 w-3" />
+                          View
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* Content Cards */}
       {loading ? (
         <div className="text-center py-6 md:py-8 text-slate-400 text-sm md:text-base">Loading content...</div>
       ) : content.length === 0 ? (
         <div className="text-center py-6 md:py-8 text-slate-400 text-sm md:text-base">No content found. Add some content to get started.</div>
       ) : (
-        <div className="bg-slate-800/50 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-slate-800">
-                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm text-slate-400">Title</th>
-                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm text-slate-400">Page</th>
-                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm text-slate-400">Section</th>
-                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm text-slate-400">Status</th>
-                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm text-slate-400">Last Modified</th>
-                  <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm text-slate-400">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-700">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {content
                   .filter(item => selectedType === 'all' || item.type === selectedType)
                   .filter(item => selectedSection === 'all' || item.section === selectedSection)
                   .map((item, index) => (
-                    <tr key={`${item.id}-${index}`} className="hover:bg-slate-800/50">
-                      <td className="px-3 md:px-6 py-3 md:py-4 text-slate-200 text-sm md:text-base">{item.title}</td>
-                      <td className="px-3 md:px-6 py-3 md:py-4 text-slate-400 capitalize text-sm md:text-base">{item.type}</td>
-                      <td className="px-3 md:px-6 py-3 md:py-4 text-slate-400 capitalize text-sm md:text-base">{item.section}</td>
-                      <td className="px-3 md:px-6 py-3 md:py-4">
-                        <button
-                          onClick={() => handleToggleStatus(item.id, item.status)}
-                          className={`px-2 md:px-3 py-1 md:py-1.5 rounded-full text-xs font-medium ${
-                            item.status === 'published'
-                              ? 'bg-emerald-500/20 text-emerald-400'
-                              : 'bg-slate-500/20 text-slate-400'
-                          }`}
-                        >
-                          {item.status}
-                        </button>
-                      </td>
-                      <td className="px-3 md:px-6 py-3 md:py-4 text-slate-400 text-xs md:text-sm">
-                        {new Date(item.lastModified).toLocaleDateString()}
-                      </td>
-                      <td className="px-3 md:px-6 py-3 md:py-4">
-                        <div className="flex space-x-2 md:space-x-3">
+              <div key={`${item.id}-${index}`} className="bg-slate-800/50 rounded-xl p-2 md:p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-200 hover:shadow-lg">
+                {/* Card Header */}
+                <div className="mb-2 md:mb-3">
+                  <div className="flex justify-between items-start mb-1 md:mb-2">
+                    <h3 className="text-slate-200 font-semibold text-sm md:text-base flex-1 pr-2 overflow-hidden" style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical'
+                    }}>{item.title}</h3>
+                    <button
+                      onClick={() => handleToggleStatus(item.id, item.status)}
+                      className={`px-0.5 py-0.5 md:px-2 md:py-1 rounded-full text-xs md:text-xs font-medium flex-shrink-0 ${
+                        item.status === 'published'
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : 'bg-slate-500/20 text-slate-400'
+                      }`}
+                    >
+                      {item.status}
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <span className="capitalize bg-slate-700/50 px-2 py-1 rounded">{item.type}</span>
+                    <span className="capitalize bg-slate-700/50 px-2 py-1 rounded">{item.section}</span>
+                  </div>
+                </div>
+
+                {/* Card Content Preview */}
+                <div className="mb-2 md:mb-4">
+                  <p className="text-slate-400 text-xs mb-1 md:mb-2">Last Modified:</p>
+                  <p className="text-slate-300 text-sm">{new Date(item.lastModified).toLocaleDateString()}</p>
+                </div>
+
+                {/* Card Actions */}
+                <div className="flex justify-between items-center pt-2 md:pt-3 border-t border-slate-700/50">
+                  <div className="flex space-x-2">
                           <button
                             onClick={() => handleEdit(item.id)}
-                            className="text-blue-400 hover:text-blue-300"
+                      className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-500/20 rounded-lg transition-colors"
                             title="Edit"
                           >
-                            <Edit className="w-4 h-4 md:w-5 md:h-5" />
+                      <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(item.id)}
-                            className="text-red-400 hover:text-red-300"
+                      className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors"
                             title="Delete"
                           >
-                            <Trash className="w-4 h-4 md:w-5 md:h-5" />
+                      <Trash className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => {
@@ -271,18 +592,15 @@ const ContentManager: React.FC = () => {
                                 : `/${item.type}`;
                               window.open(previewUrl, '_blank', 'noopener,noreferrer');
                             }}
-                            className="text-slate-400 hover:text-slate-300"
+                      className="p-2 text-slate-400 hover:text-slate-300 hover:bg-slate-500/20 rounded-lg transition-colors"
                             title="Preview"
                           >
-                            <Eye className="w-4 h-4 md:w-5 md:h-5" />
+                      <Eye className="w-4 h-4" />
                           </button>
                         </div>
-                      </td>
-                    </tr>
+                </div>
+              </div>
                   ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       )}
     </div>

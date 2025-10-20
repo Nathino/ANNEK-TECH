@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, User, ArrowLeft, Tag, Eye, Heart, Share2, MessageCircle } from 'lucide-react';
@@ -7,6 +7,10 @@ import { db } from '../lib/firebase';
 import toast from 'react-hot-toast';
 import SEOMonitor from '../components/SEOMonitor';
 import { generateBlogStructuredData, generateBreadcrumbStructuredData } from '../utils/seoUtils';
+import { useReadingTracker } from '../hooks/useReadingTracker';
+import BlogSuggestionEngine from '../utils/blogSuggestions';
+import RelatedPosts from '../components/RelatedPosts';
+import { optimizeImageUrl, FALLBACK_IMAGE } from '../utils/imageUtils';
 
 interface BlogPost {
   id: string;
@@ -38,6 +42,48 @@ const BlogPost: React.FC = () => {
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<Array<{id: string, name: string, email: string, comment: string, createdAt: string}>>([]);
 
+  // Memoize the tracking callback to prevent hook re-creation
+  const onTrackReading = useCallback(async (data: {
+    postId: string;
+    category: string;
+    tags: string[];
+    readingTime: number;
+    totalReadingTime: number;
+  }) => {
+    try {
+      const suggestionEngine = new BlogSuggestionEngine();
+      await suggestionEngine.trackReading(
+        data.postId,
+        data.category,
+        data.tags,
+        data.readingTime,
+        data.totalReadingTime
+      );
+    } catch (error) {
+      console.error('Error tracking reading:', error);
+    }
+  }, []);
+
+  // Memoize hook parameters to prevent unnecessary re-renders
+  const readingTrackerParams = useMemo(() => ({
+    postId: id || '',
+    category: post?.content?.category || 'general',
+    tags: post?.content?.tags || [],
+    estimatedReadTime: post?.content?.readTime || 5,
+    onTrackReading
+  }), [id, post?.content?.category, post?.content?.tags, post?.content?.readTime, onTrackReading]);
+
+  // Reading tracker - active but UI hidden
+  const { readingTime, readingProgress, startReading, stopReading } = useReadingTracker(readingTrackerParams);
+
+  // Use reading data for analytics (hidden from UI)
+  useEffect(() => {
+    if (readingTime > 0) {
+      // Track reading analytics in console for debugging
+      console.log(`Reading progress: ${Math.round(readingProgress)}%, Time spent: ${Math.floor(readingTime / 60)}:${(readingTime % 60).toString().padStart(2, '0')}`);
+    }
+  }, [readingTime, readingProgress]);
+
   useEffect(() => {
     const fetchPost = async () => {
       if (!id) return;
@@ -59,6 +105,11 @@ const BlogPost: React.FC = () => {
               comments: data.comments || 0
             } as BlogPost;
             setPost(blogPost);
+
+            // Start reading tracking after content is loaded (UI hidden)
+            setTimeout(() => {
+              startReading();
+            }, 3000);
 
             // Track view
             try {
@@ -262,7 +313,12 @@ const BlogPost: React.FC = () => {
     };
 
     fetchPost();
-  }, [id]);
+
+    // Cleanup on unmount
+    return () => {
+      stopReading();
+    };
+  }, [id]); // Remove stopReading from dependencies to prevent infinite loop
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -406,6 +462,7 @@ const BlogPost: React.FC = () => {
           </Link>
         </motion.div>
 
+
         {/* Featured Image */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -415,9 +472,14 @@ const BlogPost: React.FC = () => {
         >
           <div className="relative h-64 md:h-80 lg:h-[28rem] xl:h-[32rem] 2xl:h-[36rem] overflow-hidden rounded-xl md:rounded-2xl shadow-xl md:shadow-2xl">
             <img
-              src={post.content.featuredImage || "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80"}
+              src={optimizeImageUrl(post.content.featuredImage || FALLBACK_IMAGE, 1200, 600)}
               alt={post.title}
               className="w-full h-full object-cover"
+              loading="lazy"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = FALLBACK_IMAGE;
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/20 to-transparent" />
             <div className="absolute bottom-3 md:bottom-6 left-3 md:left-6 right-3 md:right-6">
@@ -529,8 +591,8 @@ const BlogPost: React.FC = () => {
               <div className="bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-xl md:rounded-2xl shadow-lg md:shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                 <div className="p-4 md:p-6 lg:p-8">
                   <div 
-                    className="prose prose-xs md:prose-sm max-w-none dark:prose-invert prose-headings:text-slate-900 dark:prose-headings:text-white prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-a:text-emerald-600 dark:prose-a:text-emerald-400 prose-strong:text-slate-900 dark:prose-strong:text-white prose-code:text-slate-900 dark:prose-code:text-white prose-code:bg-slate-100 dark:prose-code:bg-slate-700 prose-pre:bg-slate-100 dark:prose-pre:bg-slate-700 prose-blockquote:border-emerald-500 prose-blockquote:text-slate-700 dark:prose-blockquote:text-slate-300 leading-relaxed text-xs md:text-sm"
-                    dangerouslySetInnerHTML={{ __html: post.content.content.replace(/\n/g, '<br />') }}
+                    className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-slate-900 dark:prose-headings:text-white prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-a:text-emerald-600 dark:prose-a:text-emerald-400 prose-strong:text-slate-900 dark:prose-strong:text-white prose-code:text-slate-900 dark:prose-code:text-white prose-code:bg-slate-100 dark:prose-code:bg-slate-700 prose-pre:bg-slate-100 dark:prose-pre:bg-slate-700 prose-blockquote:border-emerald-500 prose-blockquote:text-slate-700 dark:prose-blockquote:text-slate-300 prose-ul:text-slate-700 dark:prose-ul:text-slate-300 prose-ol:text-slate-700 dark:prose-ol:text-slate-300 prose-li:text-slate-700 dark:prose-li:text-slate-300 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: post.content.content }}
                   />
                 </div>
               </div>
@@ -673,6 +735,18 @@ const BlogPost: React.FC = () => {
             </motion.div>
           )}
         </div>
+
+        {/* Related Posts */}
+        {post && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+            className="mb-8 md:mb-12"
+          >
+            <RelatedPosts currentPost={post} />
+          </motion.div>
+        )}
 
         {/* Call to Action */}
         <motion.div

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Save, ArrowLeft } from 'lucide-react';
+import { Save, ArrowLeft, Trash, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { db } from '../../lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import RichTextEditor from '../../components/RichTextEditor';
 
 interface ContentItem {
   id: string;
@@ -143,6 +144,47 @@ const ContentEdit: React.FC = () => {
     setShowConfirmDialog(false);
   };
 
+  // Clean HTML content to remove base64 images and other problematic data
+  const cleanHtmlContent = (html: string): string => {
+    if (!html) return html;
+    
+    // Remove any base64 image data (data:image/...)
+    let cleaned = html.replace(/data:image\/[^;]+;base64,[^"]+/g, '');
+    
+    // Remove any other data URLs that might cause issues
+    cleaned = cleaned.replace(/data:[^;]+;base64,[^"]+/g, '');
+    
+    // Remove any empty img tags that might be left behind
+    cleaned = cleaned.replace(/<img[^>]*src=""[^>]*>/g, '');
+    
+    return cleaned;
+  };
+
+  // Sanitize content for Firestore
+  const sanitizeContentForFirestore = (contentData: any): any => {
+    if (typeof contentData === 'string') {
+      // If it's a string (like HTML from Quill), clean it first
+      return cleanHtmlContent(contentData);
+    }
+    
+    if (Array.isArray(contentData)) {
+      // If it's an array, sanitize each item
+      return contentData.map((item: any) => sanitizeContentForFirestore(item));
+    }
+    
+    if (contentData && typeof contentData === 'object') {
+      // If it's an object, sanitize each property
+      const sanitized: any = {};
+      for (const [key, value] of Object.entries(contentData)) {
+        sanitized[key] = sanitizeContentForFirestore(value);
+      }
+      return sanitized;
+    }
+    
+    // For primitive values, return as is
+    return contentData;
+  };
+
   const handleSave = async () => {
     if (!content || !id) return;
     
@@ -150,11 +192,14 @@ const ContentEdit: React.FC = () => {
       setSaving(true);
       const docRef = doc(db, 'content', id);
       
+      // Sanitize content before saving to Firestore
+      const sanitizedContent = sanitizeContentForFirestore(content.content);
+      
       // Create a clean copy of the data for Firestore
       const updateData = {
         type: content.type,
         section: content.section,
-        content: { ...content.content }, // Create a shallow copy
+        content: sanitizedContent,
         status: content.status,
         lastModified: new Date().toISOString(),
         title: content.title
@@ -294,6 +339,247 @@ const ContentEdit: React.FC = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            );
+
+          case 'featured-projects':
+            return (
+              <div className="space-y-4 md:space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">Section Title</label>
+                  <input
+                    type="text"
+                    value={content.content.title || ''}
+                    onChange={(e) => handleContentChange('title', e.target.value)}
+                    className="w-full px-3 md:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">Section Description</label>
+                  <textarea
+                    value={content.content.description || ''}
+                    onChange={(e) => handleContentChange('description', e.target.value)}
+                    rows={2}
+                    className="w-full px-3 md:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base"
+                  />
+                </div>
+                <div className="space-y-3 md:space-y-4">
+                  <h3 className="text-base md:text-lg font-medium text-slate-200">Featured Projects</h3>
+                  {(content.content.projects || []).map((project: any, index: number) => (
+                    <div key={index} className="p-3 md:p-4 bg-slate-700 rounded-lg space-y-3 md:space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">Project Title</label>
+                        <input
+                          type="text"
+                          value={project.title || ''}
+                          onChange={(e) => {
+                            const newProjects = [...(content.content.projects || [])];
+                            newProjects[index] = { ...project, title: e.target.value };
+                            handleContentChange('projects', newProjects);
+                          }}
+                          className="w-full px-3 md:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">Description</label>
+                        <textarea
+                          value={project.description || ''}
+                          onChange={(e) => {
+                            const newProjects = [...(content.content.projects || [])];
+                            newProjects[index] = { ...project, description: e.target.value };
+                            handleContentChange('projects', newProjects);
+                          }}
+                          rows={3}
+                          className="w-full px-3 md:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">App Features</label>
+                        <div className="space-y-2">
+                          {(project.features || []).map((feature: string, featureIndex: number) => (
+                            <div key={featureIndex} className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={feature}
+                                onChange={(e) => {
+                                  const newProjects = [...(content.content.projects || [])];
+                                  const newFeatures = [...(project.features || [])];
+                                  newFeatures[featureIndex] = e.target.value;
+                                  newProjects[index] = { ...project, features: newFeatures };
+                                  handleContentChange('projects', newProjects);
+                                }}
+                                className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                                placeholder={`Feature ${featureIndex + 1}`}
+                              />
+                              <button
+                                onClick={() => {
+                                  const newProjects = [...(content.content.projects || [])];
+                                  const newFeatures = [...(project.features || [])];
+                                  newFeatures.splice(featureIndex, 1);
+                                  newProjects[index] = { ...project, features: newFeatures };
+                                  handleContentChange('projects', newProjects);
+                                }}
+                                className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors"
+                                title="Remove feature"
+                              >
+                                <Trash className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            onClick={() => {
+                              const newProjects = [...(content.content.projects || [])];
+                              const newFeatures = [...(project.features || []), ''];
+                              newProjects[index] = { ...project, features: newFeatures };
+                              handleContentChange('projects', newProjects);
+                            }}
+                            className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 text-sm font-medium"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add Feature
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">Image URL</label>
+                        <input
+                          type="text"
+                          value={project.image || ''}
+                          onChange={(e) => {
+                            const newProjects = [...(content.content.projects || [])];
+                            newProjects[index] = { ...project, image: e.target.value };
+                            handleContentChange('projects', newProjects);
+                          }}
+                          className="w-full px-3 md:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">Live URL</label>
+                        <input
+                          type="text"
+                          value={project.url || ''}
+                          onChange={(e) => {
+                            const newProjects = [...(content.content.projects || [])];
+                            newProjects[index] = { ...project, url: e.target.value };
+                            handleContentChange('projects', newProjects);
+                          }}
+                          className="w-full px-3 md:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">Icon Name</label>
+                        <input
+                          type="text"
+                          value={project.icon || ''}
+                          onChange={(e) => {
+                            const newProjects = [...(content.content.projects || [])];
+                            newProjects[index] = { ...project, icon: e.target.value };
+                            handleContentChange('projects', newProjects);
+                          }}
+                          className="w-full px-3 md:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base"
+                          placeholder="ShoppingCart, Leaf, Recycle, Download, etc."
+                        />
+                      </div>
+                      
+                      {/* Demo Credentials Section */}
+                      <div className="border-t border-slate-600 pt-4">
+                        <h4 className="text-sm font-medium text-slate-300 mb-3 flex items-center gap-2">
+                          <span>🔐</span>
+                          Demo Credentials (Optional)
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-slate-400 mb-1">Demo Email</label>
+                            <input
+                              type="email"
+                              value={project.demoCredentials?.email || ''}
+                              onChange={(e) => {
+                                const newProjects = [...(content.content.projects || [])];
+                                newProjects[index] = { 
+                                  ...project, 
+                                  demoCredentials: { 
+                                    ...project.demoCredentials, 
+                                    email: e.target.value 
+                                  } 
+                                };
+                                handleContentChange('projects', newProjects);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs"
+                              placeholder="demo@example.com"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-slate-400 mb-1">Demo Password</label>
+                            <input
+                              type="text"
+                              value={project.demoCredentials?.password || ''}
+                              onChange={(e) => {
+                                const newProjects = [...(content.content.projects || [])];
+                                newProjects[index] = { 
+                                  ...project, 
+                                  demoCredentials: { 
+                                    ...project.demoCredentials, 
+                                    password: e.target.value 
+                                  } 
+                                };
+                                handleContentChange('projects', newProjects);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs"
+                              placeholder="demo123"
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-3">
+                          <label className="block text-xs font-medium text-slate-400 mb-1">Instructions (Optional)</label>
+                          <textarea
+                            value={project.demoCredentials?.instructions || ''}
+                            onChange={(e) => {
+                              const newProjects = [...(content.content.projects || [])];
+                              newProjects[index] = { 
+                                ...project, 
+                                demoCredentials: { 
+                                  ...project.demoCredentials, 
+                                  instructions: e.target.value 
+                                } 
+                              };
+                              handleContentChange('projects', newProjects);
+                            }}
+                            rows={2}
+                            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs"
+                            placeholder="e.g., Use these credentials to login and explore the admin dashboard..."
+                          />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const newProjects = [...(content.content.projects || [])];
+                          newProjects.splice(index, 1);
+                          handleContentChange('projects', newProjects);
+                        }}
+                        className="px-3 md:px-4 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors text-sm md:text-base"
+                      >
+                        Remove Project
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => {
+                      const newProjects = [...(content.content.projects || []), {
+                        title: '',
+                        description: '',
+                        image: '',
+                        url: '',
+                        icon: 'ExternalLink'
+                      }];
+                      handleContentChange('projects', newProjects);
+                    }}
+                    className="px-3 md:px-4 py-2 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20 transition-colors text-sm md:text-base"
+                  >
+                    Add Project
+                  </button>
                 </div>
               </div>
             );
@@ -653,12 +939,11 @@ const ContentEdit: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">Blog Content</label>
-                  <textarea
+                  <RichTextEditor
                     value={content.content.content || ''}
-                    onChange={(e) => handleContentChange('content', e.target.value)}
-                    rows={10}
-                    className="w-full px-3 md:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base"
-                    placeholder="Enter the main blog post content"
+                    onChange={(value) => handleContentChange('content', value)}
+                    placeholder="Write your blog post content here..."
+                    height="400px"
                   />
                 </div>
                 <div>

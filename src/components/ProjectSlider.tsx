@@ -1,41 +1,154 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ShoppingCart, Leaf, Recycle, Download } from 'lucide-react';
+import { ArrowRight, ShoppingCart, Leaf, Recycle, Download, ExternalLink } from 'lucide-react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import toast from 'react-hot-toast';
+import DemoCredentials from './DemoCredentials';
 
-// Updated projects to include the client's actual work
-const projects = [
-  {
-    title: "Sales Monitor",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80",
-    description: "Business sales tracking and analytics platform",
-    icon: <ShoppingCart className="h-5 w-5" />,
-    url: "https://mysalesmonitor.web.app"
-  },
-  {
-    title: "AgroPal Ghana",
-    image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&q=80",
-    description: "Agricultural resources and marketplace platform",
-    icon: <Leaf className="h-5 w-5" />,
-    url: "https://agropalgh.web.app"
-  },
-  {
-    title: "Eco-Ghana",
-    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80",
-    description: "Environmental sustainability platform",
-    icon: <Recycle className="h-5 w-5" />,
-    url: "https://eco-ghana.web.app"
-  },
-  {
-    title: "HQ Downloader",
-    image: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?auto=format&fit=crop&q=80",
-    description: "High-quality media content downloader",
-    icon: <Download className="h-5 w-5" />,
-    url: "https://hq-downloader.web.app/"
-  }
-];
+interface Project {
+  title: string;
+  image: string;
+  description: string;
+  icon: string;
+  url: string;
+  features?: string[];
+  demoCredentials?: {
+    email: string;
+    password: string;
+    instructions?: string;
+  };
+}
+
+interface FeaturedProjectsContent {
+  title: string;
+  description: string;
+  projects: Project[];
+}
+
 
 const ProjectSlider: React.FC = () => {
+  const [content, setContent] = useState<FeaturedProjectsContent>({
+    title: 'Our Projects',
+    description: 'Explore our latest work',
+    projects: []
+  });
+  const [shuffledProjects, setShuffledProjects] = useState<Project[]>([]);
+  const [shuffleKey, setShuffleKey] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [expandedProjects, setExpandedProjects] = useState<Set<number>>(new Set());
+
+  // Function to get icon component
+  const getIconComponent = (iconName: string) => {
+    switch (iconName) {
+      case 'ShoppingCart': return <ShoppingCart className="h-5 w-5" />;
+      case 'Leaf': return <Leaf className="h-5 w-5" />;
+      case 'Recycle': return <Recycle className="h-5 w-5" />;
+      case 'Download': return <Download className="h-5 w-5" />;
+      default: return <ExternalLink className="h-5 w-5" />;
+    }
+  };
+
+  // Function to shuffle array
+  const shuffleArray = (array: Project[]) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  const toggleExpanded = (index: number) => {
+    setExpandedProjects(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
+  const truncateDescription = (description: string, maxLength: number = 100) => {
+    if (description.length <= maxLength) return description;
+    return description.substring(0, maxLength) + '...';
+  };
+
+  // Fetch featured projects from Firebase
+  useEffect(() => {
+    const q = query(
+      collection(db, 'content'),
+      where('type', '==', 'home'),
+      where('section', '==', 'featured-projects'),
+      where('status', '==', 'published')
+    );
+
+    const unsubscribe = onSnapshot(q,
+      (snapshot) => {
+        console.log('🔄 Fetching featured projects from Firebase...');
+        const doc = snapshot.docs[0];
+        if (doc) {
+          const data = doc.data();
+          console.log(`📄 Featured projects document found: ${doc.id}`);
+          console.log(`🔧 Projects count: ${data.content.projects?.length || 0}`);
+          const projectsData = {
+            title: data.content.title || 'Our Projects',
+            description: data.content.description || 'Explore our latest work',
+            projects: data.content.projects || []
+          };
+          setContent(projectsData);
+          setShuffledProjects(projectsData.projects);
+        } else {
+          console.log('📄 No featured projects document found');
+          // No data available
+          setContent({
+            title: 'Our Projects',
+            description: 'Explore our latest work',
+            projects: []
+          });
+          setShuffledProjects([]);
+        }
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error fetching featured projects:', error);
+        toast.error('Failed to load projects');
+        setContent({
+          title: 'Our Projects',
+          description: 'Explore our latest work',
+          projects: []
+        });
+        setShuffledProjects([]);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  // Shuffle projects every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShuffledProjects(shuffleArray(content.projects));
+      setShuffleKey(prev => prev + 1);
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [content.projects]);
+
+  if (loading) {
+    return <div className="py-20 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500" />
+    </div>;
+  }
+
+  if (content.projects.length === 0) {
+    return null;
+  }
+
   return (
     <motion.section 
       className="py-20 bg-white dark:bg-slate-900"
@@ -47,8 +160,8 @@ const ProjectSlider: React.FC = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center mb-12">
           <div className="mb-6 md:mb-0">
-            <h2 className="section-title">Our Projects</h2>
-            <p className="section-subtitle mb-0">Explore our latest work</p>
+            <h2 className="section-title">{content.title}</h2>
+            <p className="section-subtitle mb-0">{content.description}</p>
           </div>
           <Link 
             to="/portfolio"
@@ -60,8 +173,14 @@ const ProjectSlider: React.FC = () => {
         </div>
         
         {/* Desktop Grid View */}
-        <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {projects.map((project, index) => (
+        <motion.div 
+          key={shuffleKey} 
+          className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+        >
+          {shuffledProjects.map((project, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
@@ -80,15 +199,28 @@ const ProjectSlider: React.FC = () => {
               <div className="p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="h-8 w-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shadow-inner text-emerald-600 dark:text-emerald-400">
-                    {project.icon}
+                    {getIconComponent(project.icon)}
                   </div>
                   <h3 className="text-xl font-semibold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                     {project.title}
                   </h3>
                 </div>
-                <p className="text-slate-600 dark:text-slate-300 mb-4">
-                  {project.description}
-                </p>
+                <div className="mb-4">
+                  <p className="text-slate-600 dark:text-slate-300">
+                    {expandedProjects.has(index) 
+                      ? project.description 
+                      : truncateDescription(project.description)
+                    }
+                  </p>
+                  {project.description.length > 100 && (
+                    <button
+                      onClick={() => toggleExpanded(index)}
+                      className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 text-sm font-medium mt-2 transition-colors"
+                    >
+                      {expandedProjects.has(index) ? 'Read Less' : 'Read More'}
+                    </button>
+                  )}
+                </div>
                 <a 
                   href={project.url} 
                   target="_blank" 
@@ -100,13 +232,19 @@ const ProjectSlider: React.FC = () => {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Mobile Horizontal Scroll View */}
         <div className="md:hidden">
           <div className="relative">
-            <div className="flex overflow-x-auto scrollbar-hide gap-4 px-4 pb-4 snap-x snap-mandatory scroll-smooth">
-              {projects.map((project, index) => (
+            <motion.div 
+              key={shuffleKey} 
+              className="flex overflow-x-auto scrollbar-hide gap-4 px-4 pb-4 snap-x snap-mandatory scroll-smooth"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+            >
+              {shuffledProjects.map((project, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: 20 }}
@@ -125,27 +263,73 @@ const ProjectSlider: React.FC = () => {
                   <div className="p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="h-6 w-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shadow-inner text-emerald-600 dark:text-emerald-400">
-                        {project.icon}
+                        {getIconComponent(project.icon)}
                       </div>
                       <h3 className="text-lg font-semibold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         {project.title}
                       </h3>
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-300 mb-3">
-                      {project.description}
-                    </p>
-                    <a 
-                      href={project.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 flex items-center gap-1"
-                    >
-                      View Project <ArrowRight className="h-3 w-3" />
-                    </a>
+                    <div className="mb-3">
+                      <p className="text-sm text-slate-600 dark:text-slate-300">
+                        {expandedProjects.has(index) 
+                          ? project.description 
+                          : truncateDescription(project.description, 80)
+                        }
+                      </p>
+                      {project.description.length > 80 && (
+                        <button
+                          onClick={() => toggleExpanded(index)}
+                          className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 text-xs font-medium mt-1 transition-colors"
+                        >
+                          {expandedProjects.has(index) ? 'Read Less' : 'Read More'}
+                        </button>
+                      )}
+                      
+                      {/* Features */}
+                      {project.features && project.features.length > 0 && (
+                        <div className="mt-3">
+                          <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Key Features:</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {project.features.slice(0, 3).map((feature, featureIndex) => (
+                              <span
+                                key={featureIndex}
+                                className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-1 rounded-full"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                            {project.features.length > 3 && (
+                              <span className="text-xs text-slate-500 dark:text-slate-400 px-2 py-1">
+                                +{project.features.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-3">
+                      <a 
+                        href={project.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 flex items-center gap-1"
+                      >
+                        View Project <ArrowRight className="h-3 w-3" />
+                      </a>
+                      
+                      {/* Demo Credentials */}
+                      {project.demoCredentials?.email && project.demoCredentials?.password && (
+                        <DemoCredentials 
+                          credentials={project.demoCredentials}
+                          projectUrl={project.url}
+                          projectTitle={project.title}
+                        />
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
             {/* Scroll indicator */}
             <div className="flex justify-center mt-2">
               <div className="flex space-x-1">

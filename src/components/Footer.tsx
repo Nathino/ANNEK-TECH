@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Facebook, Instagram } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
@@ -80,6 +80,13 @@ const Footer: React.FC = () => {
               >
                 <Instagram className="h-5 w-5 text-emerald-500 group-hover:text-emerald-400 transition-colors" />
                 Instagram
+              </a>
+              <a 
+                href="https://linkedin.com/company/annektech" 
+                className="flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-colors group"
+              >
+                <Linkedin className="h-5 w-5 text-emerald-500 group-hover:text-emerald-400 transition-colors" />
+                LinkedIn
               </a>
             </div>
           </div>

@@ -54,6 +54,19 @@ service cloud.firestore {
       allow write: if isAdmin();  // Only admin can create/edit/delete blog posts
     }
     
+    // User interests collection for blog suggestions
+    match /userInterests/{document=**} {
+      allow create: if true;  // Anyone can create user interest data
+      allow read: if true;  // Anyone can read user interest data
+      allow update, delete: if isAdmin();  // Only admin can modify/delete user interest data
+    }
+    
+    // Partner submissions collection
+    match /partner-submissions/{document=**} {
+      allow create: if true;  // Anyone can submit partner applications
+      allow read, update, delete: if isAdmin();  // Only admin can manage partner submissions
+    }
+    
     // Default rule - deny everything else
     match /{document=**} {
       allow read, write: if false;

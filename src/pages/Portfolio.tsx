@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ExternalLink, ShoppingCart, Leaf, Recycle, Download, Utensils, QrCode, Users, Building2 } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
+import DemoCredentials from '../components/DemoCredentials';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import toast from 'react-hot-toast';
@@ -15,6 +16,12 @@ interface Project {
   liveUrl: string;
   icon?: React.ReactNode | string;
   demoUrl?: string;
+  features?: string[];
+  demoCredentials?: {
+    email: string;
+    password: string;
+    instructions?: string;
+  };
 }
 
 interface PortfolioContent {
@@ -27,6 +34,7 @@ const Portfolio: React.FC = () => {
   const [content, setContent] = useState<PortfolioContent>({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [expandedProjects, setExpandedProjects] = useState<Set<number>>(new Set());
 
   const getIconComponent = (iconName: string) => {
     switch (iconName) {
@@ -42,14 +50,39 @@ const Portfolio: React.FC = () => {
     }
   };
 
+  const toggleExpanded = (index: number) => {
+    setExpandedProjects(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
+  const truncateDescription = (description: string, maxLength: number = 120) => {
+    if (description.length <= maxLength) return description;
+    return description.substring(0, maxLength) + '...';
+  };
+
   useEffect(() => {
-    const q = query(
+    // Fetch both portfolio and featured projects
+    const portfolioQuery = query(
       collection(db, 'content'),
       where('type', '==', 'portfolio'),
       where('status', '==', 'published')
     );
 
-    const unsubscribe = onSnapshot(q,
+    const featuredProjectsQuery = query(
+      collection(db, 'content'),
+      where('type', '==', 'home'),
+      where('section', '==', 'featured-projects'),
+      where('status', '==', 'published')
+    );
+
+    const unsubscribePortfolio = onSnapshot(portfolioQuery,
       (snapshot) => {
         const portfolioContent: PortfolioContent = {};
         snapshot.docs.forEach(doc => {
@@ -58,7 +91,7 @@ const Portfolio: React.FC = () => {
             portfolioContent.title = data.content.title;
             portfolioContent.description = data.content.description;
           } else if (data.section === 'projects') {
-            portfolioContent.projects = data.content.projects;
+            portfolioContent.projects = data.content.projects || [];
           }
         });
         setContent(portfolioContent);
@@ -71,7 +104,29 @@ const Portfolio: React.FC = () => {
       }
     );
 
-    return () => unsubscribe();
+    const unsubscribeFeatured = onSnapshot(featuredProjectsQuery,
+      (snapshot) => {
+        const doc = snapshot.docs[0];
+        if (doc) {
+          const data = doc.data();
+          const featuredProjects = data.content.projects || [];
+          
+          // Merge featured projects with existing portfolio projects
+          setContent(prevContent => ({
+            ...prevContent,
+            projects: [...(prevContent.projects || []), ...featuredProjects]
+          }));
+        }
+      },
+      (error) => {
+        console.error('Error fetching featured projects for portfolio:', error);
+      }
+    );
+
+    return () => {
+      unsubscribePortfolio();
+      unsubscribeFeatured();
+    };
   }, []);
 
   if (loading) {
@@ -80,95 +135,10 @@ const Portfolio: React.FC = () => {
     </div>;
   }
 
-  // Updated projects with the ones provided by the user
-  const defaultProjects = [
-    {
-      title: "SALES MONITOR",
-      description: "A comprehensive sales tracking system for businesses to monitor transactions, inventory, and customer relationships in real-time with analytics dashboards.",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80",
-      technologies: [],
-      liveUrl: "https://mysalesmonitor.web.app",
-      icon: <ShoppingCart className="h-5 w-5" />,
-      demoUrl: "/contact?product=SALES MONITOR&demo=true"
-    },
-    {
-      title: "THE WELFARE",
-      description: "A welfare platform designed to help manage community support, donations, and charitable initiatives with easy tracking of funds and beneficiaries.",
-      image: "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&q=80",
-      technologies: [],
-      liveUrl: "https://the-welfare.web.app/",
-      icon: <Users className="h-5 w-5" />
-    },
-    {
-      title: "AGROPAL GHANA",
-      description: "An integrated agricultural platform connecting farmers with expert advice, local markets and agricultural inputs. Features include crop tracking, seasonal planning, and pest management tools for Ghanaian farmers.",
-      image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&q=80",
-      technologies: [],
-      liveUrl: "https://agropalgh.web.app",
-      icon: <Leaf className="h-5 w-5" />
-    },
-    {
-      title: "ECO-GHANA",
-      description: "A comprehensive environmental platform that educates Ghanaians on sustainable practices, tracks local conservation efforts, and connects eco-conscious communities. Features waste management resources and climate change awareness tools.",
-      image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80",
-      technologies: [],
-      liveUrl: "https://eco-ghana.web.app",
-      icon: <Recycle className="h-5 w-5" />
-    },
-    {
-      title: "HQ DOWNLOADER",
-      description: "A powerful web application that allows users to download high-quality media content from various platforms with format conversion options.",
-      image: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?auto=format&fit=crop&q=80",
-      technologies: [],
-      liveUrl: "https://hq-downloader.web.app/",
-      icon: <Download className="h-5 w-5" />
-    },
-    {
-      title: "ORTHYS",
-      description: "A comprehensive business management suite designed for shops, restaurants, and hotels. Features include inventory management, staff scheduling, customer tracking, and financial reporting.",
-      image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80",
-      technologies: [],
-      liveUrl: "https://food-hub-b8e39.web.app",
-      icon: <Utensils className="h-5 w-5" />,
-      demoUrl: "/contact?product=ORTHYS&demo=true"
-    },
-    {
-      title: "TRACK FOOD GH",
-      description: "A comprehensive system for tracking food supplies in schools across Ghana, ensuring proper distribution and inventory management of school feeding programs.",
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80",
-      technologies: [],
-      liveUrl: "#",
-      icon: <Utensils className="h-5 w-5" />
-    },
-    {
-      title: "GRADE IT",
-      description: "An advanced school grading system designed for comprehensive assessment record keeping, grade calculation, and academic performance tracking in educational institutions.",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80",
-      technologies: [],
-      liveUrl: "#",
-      icon: <QrCode className="h-5 w-5" />
-    },
-    {
-      title: "STORY VIBEZ",
-      description: "An interactive storytelling platform where users can create, share, and explore captivating stories with rich media integration and community engagement.",
-      image: "https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&q=80",
-      technologies: [],
-      liveUrl: "https://story-vibez.web.app/",
-      icon: <QrCode className="h-5 w-5" />
-    },
-    {
-      title: "ULTIMATE QR CODE",
-      description: "A QR code generator and scanner with advanced customization options, analytics, and business integration capabilities for marketing and inventory management.",
-      image: "https://images.unsplash.com/photo-1598291286794-d417e2685f85?auto=format&fit=crop&q=80",
-      technologies: [],
-      liveUrl: "https://ultimateqrcode.web.app/",
-      icon: <QrCode className="h-5 w-5" />
-    }
-  ];
   
   const categories = ['all', 'web app', 'mobile', 'e-commerce'];
-  // Prioritize actual ANNEK TECH projects, use Firebase as fallback for additional projects
-  const projects = defaultProjects;
+  // Use projects from Firebase content
+  const projects = content.projects || [];
 
   // Calculate years of experience automatically
   // Note: Currently hardcoded to 2+ for 2024, will be 3+ in 2025
@@ -411,7 +381,7 @@ const Portfolio: React.FC = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true, amount: 0.2 }}
         >
-          {filteredProjects.map((project, index) => (
+          {filteredProjects.length > 0 ? filteredProjects.map((project, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
@@ -438,12 +408,47 @@ const Portfolio: React.FC = () => {
                   </h3>
                 </div>
                 
-                <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 mb-4 line-clamp-2 md:line-clamp-3">
-                  {project.description}
-                </p>
+                <div className="mb-4">
+                  <p className="text-sm md:text-base text-slate-600 dark:text-slate-300">
+                    {expandedProjects.has(index) 
+                      ? project.description 
+                      : truncateDescription(project.description)
+                    }
+                  </p>
+                  {project.description.length > 120 && (
+                    <button
+                      onClick={() => toggleExpanded(index)}
+                      className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 text-sm font-medium mt-2 transition-colors"
+                    >
+                      {expandedProjects.has(index) ? 'Read Less' : 'Read More'}
+                    </button>
+                  )}
+                  
+                  {/* Features */}
+                  {project.features && project.features.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-2">Key Features:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {project.features.slice(0, 4).map((feature, featureIndex) => (
+                          <span
+                            key={featureIndex}
+                            className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-full"
+                          >
+                            {feature}
+                          </span>
+                        ))}
+                        {project.features.length > 4 && (
+                          <span className="text-xs text-slate-500 dark:text-slate-400 px-3 py-1">
+                            +{project.features.length - 4} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 
                 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <div className="flex justify-center">
                     <a
                       href={project.liveUrl}
@@ -455,6 +460,15 @@ const Portfolio: React.FC = () => {
                       Live Demo
                     </a>
                   </div>
+                  
+                  {/* Demo Credentials */}
+                  {project.demoCredentials?.email && project.demoCredentials?.password && (
+                    <DemoCredentials 
+                      credentials={project.demoCredentials}
+                      projectUrl={project.liveUrl}
+                      projectTitle={project.title}
+                    />
+                  )}
                   
                   {project.demoUrl && (
                     <div className="flex justify-center">
@@ -470,7 +484,12 @@ const Portfolio: React.FC = () => {
                 </div>
               </div>
             </motion.div>
-          ))}
+          )) : (
+            <div className="col-span-full text-center py-12">
+              <div className="text-slate-400 text-lg mb-4">No projects available yet.</div>
+              <p className="text-slate-500">Add projects through the admin interface to see them here.</p>
+            </div>
+          )}
         </motion.div>
 
         {/* Call to Action Section */}

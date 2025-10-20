@@ -69,7 +69,7 @@ const FeaturedPartners: React.FC = () => {
 
   return (
     <motion.section 
-      className="py-16 md:py-24 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative overflow-hidden"
+      className="py-8 md:py-12 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative overflow-hidden"
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 0.2 }}
@@ -84,7 +84,7 @@ const FeaturedPartners: React.FC = () => {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div 
-          className="text-center max-w-4xl mx-auto mb-16"
+          className="text-center max-w-4xl mx-auto mb-8"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
@@ -103,7 +103,7 @@ const FeaturedPartners: React.FC = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-12">
+        <div className="flex overflow-x-auto gap-4 sm:gap-6 lg:gap-8 pb-4 sm:grid sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 sm:overflow-visible sm:pb-0">
           {content.partners.map((partner, index) => (
             <motion.div
               key={index}
@@ -116,7 +116,7 @@ const FeaturedPartners: React.FC = () => {
                 stiffness: 100
               }}
               viewport={{ once: true, amount: 0.3 }}
-              className="group relative"
+              className="group relative flex-shrink-0 w-80 sm:w-auto"
             >
               <div className="relative overflow-hidden rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-2xl hover:shadow-emerald-500/20 dark:hover:shadow-emerald-400/20 transition-all duration-500 hover:scale-105 border border-white/20 dark:border-slate-700/50 h-full">
                 {/* Animated gradient border */}
@@ -125,22 +125,22 @@ const FeaturedPartners: React.FC = () => {
                 </div>
                 
                 {/* Content */}
-                <div className="relative p-8 lg:p-10 flex flex-col h-full">
+                <div className="relative p-4 lg:p-6 flex flex-col h-full">
                   {/* Category Badge */}
-                  <div className="text-center mb-6">
+                  <div className="text-center mb-3">
                     <span className="inline-block px-4 py-2 text-sm font-bold rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">
                       {partner.category}
                     </span>
                   </div>
 
                   {/* Logo Container */}
-                  <div className="relative w-24 h-24 md:w-28 md:h-28 mx-auto mb-8">
+                  <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-44 lg:h-44 mx-auto mb-4">
                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 rounded-2xl transform rotate-3 group-hover:rotate-6 transition-transform duration-500" />
-                    <div className="absolute inset-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg flex items-center justify-center">
+                    <div className="absolute inset-0.5 bg-white dark:bg-slate-800 rounded-xl shadow-lg flex items-center justify-center">
                       <img
                         src={partner.logo}
                         alt={partner.name}
-                        className="w-16 h-16 object-contain p-2 transform group-hover:scale-110 transition-transform duration-300"
+                        className="w-28 h-28 md:w-36 md:h-36 lg:w-40 lg:h-40 object-contain p-1 transform group-hover:scale-110 transition-transform duration-300"
                       />
                     </div>
                   </div>
@@ -148,10 +148,10 @@ const FeaturedPartners: React.FC = () => {
                   {/* Content */}
                   <div className="text-center flex-grow flex flex-col justify-between">
                     <div>
-                      <h3 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                      <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         {partner.name}
                       </h3>
-                      <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-lg">
+                      <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm md:text-base">
                         {partner.description}
                       </p>
                     </div>
@@ -171,7 +171,7 @@ const FeaturedPartners: React.FC = () => {
 
         {/* Call to Action */}
         <motion.div 
-          className="text-center mt-16"
+          className="text-center mt-8"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}

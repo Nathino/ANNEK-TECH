@@ -1,25 +1,45 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Icon sizes needed for PWA
 const iconSizes = [72, 96, 128, 144, 152, 192, 384, 512];
 
-// Create a simple SVG icon generator
-function generateIcon(size) {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#3b82f6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  <rect width="${size}" height="${size}" rx="${size * 0.2}" fill="url(#gradient)"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" 
-        font-family="Arial, sans-serif" font-weight="bold" 
-        font-size="${size * 0.4}" fill="white">AT</text>
-</svg>`;
+// Create a simple PNG icon generator using Canvas API
+async function generatePNGIcon(size) {
+  try {
+    const { createCanvas } = await import('canvas');
+    
+    const canvasElement = createCanvas(size, size);
+    const ctx = canvasElement.getContext('2d');
+    
+    // Create gradient background
+    const gradient = ctx.createLinearGradient(0, 0, size, size);
+    gradient.addColorStop(0, '#10b981');
+    gradient.addColorStop(0.5, '#3b82f6');
+    gradient.addColorStop(1, '#8b5cf6');
+    
+    // Draw rounded rectangle background
+    const cornerRadius = size * 0.2;
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, size, size, cornerRadius);
+    ctx.fill();
+    
+    // Add "AT" text
+    ctx.fillStyle = 'white';
+    ctx.font = `bold ${size * 0.4}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('AT', size / 2, size / 2);
+    
+    return canvasElement.toBuffer('image/png');
+  } catch (error) {
+    throw new Error(`Canvas not available: ${error.message}`);
+  }
 }
 
 // Create icons directory if it doesn't exist
@@ -28,19 +48,29 @@ if (!fs.existsSync(iconsDir)) {
   fs.mkdirSync(iconsDir, { recursive: true });
 }
 
-// Generate icons
-iconSizes.forEach(size => {
-  const svgContent = generateIcon(size);
-  const filename = `icon-${size}x${size}.png`;
-  const filepath = path.join(iconsDir, filename);
+// Generate missing icons
+async function generateAllIcons() {
+  for (const size of iconSizes) {
+    const filename = `icon-${size}x${size}.png`;
+    const filepath = path.join(iconsDir, filename);
+    
+    // Check if icon already exists
+    if (fs.existsSync(filepath)) {
+      console.log(`${filename} already exists, skipping...`);
+      continue;
+    }
+    
+    try {
+      const pngBuffer = await generatePNGIcon(size);
+      fs.writeFileSync(filepath, pngBuffer);
+      console.log(`Generated ${filename}`);
+    } catch (error) {
+      console.error(`Failed to generate ${filename}: ${error.message}`);
+    }
+  }
   
-  // For now, save as SVG (in production, you'd convert to PNG)
-  const svgFilename = `icon-${size}x${size}.svg`;
-  const svgFilepath = path.join(iconsDir, svgFilename);
-  
-  fs.writeFileSync(svgFilepath, svgContent);
-  console.log(`Generated ${svgFilename}`);
-});
+  console.log('PWA icons generation completed!');
+}
 
-console.log('PWA icons generated successfully!');
-console.log('Note: In production, convert SVG files to PNG format for better compatibility.');
+// Run the generation
+generateAllIcons().catch(console.error);

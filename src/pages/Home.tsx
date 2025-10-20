@@ -4,6 +4,7 @@ import { ArrowRight, Code2, Building2, LineChart, Server, Smartphone, PenTool, C
 import { Link } from 'react-router-dom';
 import ProjectSlider from '../components/ProjectSlider';
 import FeaturedPartners from '../components/FeaturedPartners';
+import BlogSlideshow from '../components/BlogSlideshow';
 import SEOHead from '../components/SEOHead';
 import SEOMonitor from '../components/SEOMonitor';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -28,6 +29,9 @@ const Home: React.FC = () => {
   // Force rebuild to clear any cached stats references
 
   useEffect(() => {
+    // Clear any cached content first
+    setContent({});
+    
     // Subscribe to content changes
     const q = query(
       collection(db, 'content'),
@@ -37,15 +41,18 @@ const Home: React.FC = () => {
 
     const unsubscribe = onSnapshot(q, 
       (snapshot) => {
+        console.log('🔄 Fetching fresh content from Firebase...');
         const homeContent: HomeContent = {};
         snapshot.docs.forEach(doc => {
           const data = doc.data();
+          console.log(`📄 Processing section: ${data.section}`);
           if (data.section === 'hero') {
             homeContent.heroTitle = data.content.heroTitle;
             homeContent.heroDescription = data.content.heroDescription;
             homeContent.heroImage = data.content.heroImage;
           } else if (data.section === 'services') {
-            homeContent.services = data.content.services;
+            homeContent.services = data.content.services || [];
+            console.log(`🔧 Services found: ${homeContent.services?.length || 0}`);
           }
         });
         setContent(homeContent);
@@ -54,6 +61,7 @@ const Home: React.FC = () => {
       (error) => {
         console.error('Error fetching home content:', error);
         toast.error('Failed to load content');
+        setContent({});
         setLoading(false);
       }
     );
@@ -324,6 +332,16 @@ const Home: React.FC = () => {
         </motion.div>
       </motion.section>
 
+      {/* Blog Slideshow */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true, amount: 0.2 }}
+      >
+        <BlogSlideshow />
+      </motion.div>
+
       {/* Services Section */}
       <motion.section 
         className="py-20 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800"
@@ -357,23 +375,7 @@ const Home: React.FC = () => {
           
           {/* Desktop Grid View */}
           <div className="hidden md:grid grid-cols-3 gap-8 px-4">
-            {(content.services || [
-              {
-                icon: 'code',
-                title: "Web Development",
-                description: "Custom web applications built with modern technologies that deliver exceptional user experiences and drive business results."
-              },
-              {
-                icon: 'server',
-                title: "Enterprise Solutions",
-                description: "Scalable software infrastructure for growing businesses with secure cloud architecture and robust backend systems."
-              },
-              {
-                icon: 'chart',
-                title: "Digital Transformation",
-                description: "Strategic technology implementation to modernize operations and enhance customer experiences in the digital age."
-              }
-            ]).map((service, index) => {
+            {content.services && content.services.length > 0 ? content.services.map((service, index) => {
               const colors = [
                 { bg: 'bg-emerald-500', text: 'text-emerald-600', light: 'bg-emerald-100', dark: 'bg-emerald-900/30' },
                 { bg: 'bg-teal-500', text: 'text-teal-600', light: 'bg-teal-100', dark: 'bg-teal-900/30' },
@@ -412,30 +414,18 @@ const Home: React.FC = () => {
                   </div>
                 </motion.div>
               );
-            })}
+            }) : (
+              <div className="col-span-3 text-center py-12">
+                <p className="text-slate-400">No services available. Add services through the admin interface.</p>
+              </div>
+            )}
           </div>
 
           {/* Mobile Horizontal Scroll View */}
           <div className="md:hidden">
             <div className="relative">
               <div className="flex overflow-x-auto scrollbar-hide gap-4 px-4 pb-4 snap-x snap-mandatory scroll-smooth">
-              {(content.services || [
-                {
-                  icon: 'code',
-                  title: "Web Development",
-                  description: "Custom web applications built with modern technologies that deliver exceptional user experiences and drive business results."
-                },
-                {
-                  icon: 'server',
-                  title: "Enterprise Solutions",
-                  description: "Scalable software infrastructure for growing businesses with secure cloud architecture and robust backend systems."
-                },
-                {
-                  icon: 'chart',
-                  title: "Digital Transformation",
-                  description: "Strategic technology implementation to modernize operations and enhance customer experiences in the digital age."
-                }
-              ]).map((service, index) => {
+              {content.services && content.services.length > 0 ? content.services.map((service, index) => {
                 const colors = [
                   { bg: 'bg-emerald-500', text: 'text-emerald-600', light: 'bg-emerald-100', dark: 'bg-emerald-900/30' },
                   { bg: 'bg-teal-500', text: 'text-teal-600', light: 'bg-teal-100', dark: 'bg-teal-900/30' },
@@ -472,7 +462,11 @@ const Home: React.FC = () => {
                     </div>
                   </motion.div>
                 );
-              })}
+              }) : (
+                <div className="flex-shrink-0 w-72 text-center py-12">
+                  <p className="text-slate-400">No services available. Add services through the admin interface.</p>
+                </div>
+              )}
               </div>
               {/* Scroll indicator */}
               <div className="flex justify-center mt-4">
