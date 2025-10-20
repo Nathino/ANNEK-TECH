@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-slate-900 text-slate-300 border-t border-slate-800 rounded-t-[2rem]">
+    <footer className="bg-slate-900 text-slate-300 border-t border-slate-800 rounded-t-[2rem] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
@@ -36,7 +36,7 @@ const Footer: React.FC = () => {
             <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text mb-4">
               Quick Links
             </h3>
-            <ul className="grid grid-cols-4 gap-2 md:grid-cols-1 md:space-y-3 md:gap-0">
+            <ul className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:grid-cols-1 md:space-y-3 md:gap-0">
               <li>
                 <Link to="/" className="hover:text-emerald-400 transition-colors text-center md:text-left block">HOME</Link>
               </li>
@@ -57,7 +57,7 @@ const Footer: React.FC = () => {
             <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text mb-4">
               Follow Us
             </h3>
-            <div className="flex space-x-6">
+            <div className="flex flex-wrap gap-4 sm:gap-6">
               <a 
                 href="https://twitter.com/annektech" 
                 className="flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-colors group"
