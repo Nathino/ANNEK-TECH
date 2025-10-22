@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Save, ArrowLeft, Trash, Plus } from 'lucide-react';
+import { Save, ArrowLeft, Trash, Plus, Upload, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { db } from '../../lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import RichTextEditor from '../../components/RichTextEditor';
+import { useImageUpload } from '../../hooks/useImageUpload';
 
 interface ContentItem {
   id: string;
@@ -25,6 +26,15 @@ const ContentEdit: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [originalContent, setOriginalContent] = useState<ContentItem | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  
+  // Image upload hook with compression
+  const { uploadImage, uploading, progress } = useImageUpload({
+    folder: 'blog',
+    preset: 'featured',
+    onError: (error) => {
+      console.error('Image upload error:', error);
+    }
+  });
 
   useEffect(() => {
     fetchContent();
@@ -121,6 +131,7 @@ const ContentEdit: React.FC = () => {
     if (!originalContent) return false;
     return JSON.stringify(newContent) !== JSON.stringify(originalContent);
   };
+
 
 
   // Function to handle navigation with unsaved changes check
@@ -947,14 +958,57 @@ const ContentEdit: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">Featured Image URL</label>
-                  <input
-                    type="text"
-                    value={content.content.featuredImage || ''}
-                    onChange={(e) => handleContentChange('featuredImage', e.target.value)}
-                    className="w-full px-3 md:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base"
-                    placeholder="Enter featured image URL"
-                  />
+                  <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">Featured Image</label>
+                  <div className="space-y-4">
+                    {content.content.featuredImage && (
+                      <div className="relative group">
+                        <img
+                          src={content.content.featuredImage}
+                          alt="Featured"
+                          className="w-full h-48 object-cover rounded-xl border border-slate-600"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleContentChange('featuredImage', '')}
+                          className="absolute top-3 right-3 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-xl cursor-pointer hover:bg-emerald-600 transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-emerald-500/25">
+                        <Upload className="h-4 w-4" />
+                        {uploading ? `${progress.message}...` : 'Upload Image'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const url = await uploadImage(file);
+                              if (url) {
+                                handleContentChange('featuredImage', url);
+                              }
+                            }
+                          }}
+                          disabled={uploading}
+                        />
+                      </label>
+                      
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={content.content.featuredImage || ''}
+                          onChange={(e) => handleContentChange('featuredImage', e.target.value)}
+                          className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all duration-200"
+                          placeholder="Or enter image URL directly"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">Category</label>

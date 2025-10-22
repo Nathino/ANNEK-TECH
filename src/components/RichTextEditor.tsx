@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useCallback } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import '../styles/quill.css';
-import { CLOUDINARY_CONFIG, getCloudinaryUploadUrl } from '../lib/cloudinary';
+import { useImageUpload } from '../hooks/useImageUpload';
 import toast from 'react-hot-toast';
 
 interface RichTextEditorProps {
@@ -20,32 +20,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const quillRef = useRef<ReactQuill>(null);
 
-  // Handle image upload to Cloudinary
-  const handleImageUpload = async (file: File): Promise<string> => {
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
-      formData.append('cloud_name', CLOUDINARY_CONFIG.cloudName);
-      formData.append('folder', `${CLOUDINARY_CONFIG.folder}/blog-content`);
-
-      const response = await fetch(getCloudinaryUploadUrl(), {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      const data = await response.json();
-      return data.secure_url;
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error('Failed to upload image');
-      throw error;
+  // Use the image upload hook with compression
+  const { uploadImage, uploading } = useImageUpload({
+    folder: 'blog-content',
+    preset: 'blogContent',
+    onError: (error) => {
+      console.error('Image upload error:', error);
     }
-  };
+  });
 
   const modules = useMemo(() => ({
     toolbar: {
@@ -74,15 +56,22 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 const quill = quillRef.current?.getEditor();
                 if (quill) {
                   const range = quill.getSelection();
-                  quill.insertText(range?.index || 0, 'Uploading image...');
+                  quill.insertText(range?.index || 0, uploading ? 'Compressing and uploading image...' : 'Uploading image...');
                   
-                  // Upload to Cloudinary
-                  const imageUrl = await handleImageUpload(file);
+                  // Upload to Cloudinary with compression
+                  const imageUrl = await uploadImage(file);
                   
-                  // Insert image URL into editor
-                  if (range) {
-                    quill.deleteText(range.index, 18); // Remove "Uploading image..." text
-                    quill.insertEmbed(range.index, 'image', imageUrl);
+                  if (imageUrl) {
+                    // Insert image URL into editor
+                    if (range) {
+                      quill.deleteText(range.index, 40); // Remove loading text
+                      quill.insertEmbed(range.index, 'image', imageUrl);
+                    }
+                  } else {
+                    // Remove loading text on failure
+                    if (range) {
+                      quill.deleteText(range.index, 40);
+                    }
                   }
                 }
               } catch (error) {

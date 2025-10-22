@@ -3,8 +3,9 @@ import { Upload, Trash, Image, FileText, Film, File } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { db } from '../../lib/firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { CLOUDINARY_CONFIG, getCloudinaryUploadUrl } from '../../lib/cloudinary';
+import { useImageUpload } from '../../hooks/useImageUpload';
 import { useAuth } from '../../hooks/useAuth';
+import { CLOUDINARY_CONFIG } from '../../lib/cloudinary';
 
 interface MediaItem {
   id: string;
@@ -21,6 +22,15 @@ const MediaManager: React.FC = () => {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dragActive, setDragActive] = useState(false);
+  
+  // Image upload hook with compression
+  const { uploadImage, uploading, progress } = useImageUpload({
+    folder: '',
+    preset: 'media',
+    onError: (error) => {
+      console.error('Media upload error:', error);
+    }
+  });
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -84,36 +94,23 @@ const MediaManager: React.FC = () => {
 
     for (const file of files) {
       try {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
-        formData.append('cloud_name', CLOUDINARY_CONFIG.cloudName);
-        formData.append('folder', CLOUDINARY_CONFIG.folder);
+        // Use the image upload hook with compression
+        const url = await uploadImage(file);
+        
+        if (url) {
+          // Add the file metadata to Firestore
+          const mediaCollection = collection(db, 'media');
+          await addDoc(mediaCollection, {
+            name: file.name,
+            type: file.type,
+            url: url,
+            size: formatFileSize(file.size),
+            uploadDate: new Date().toISOString(),
+            publicId: url.split('/').pop()?.split('.')[0] || '' // Extract public ID from URL
+          });
 
-        const response = await fetch(getCloudinaryUploadUrl(), {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(`Upload failed: ${errorData}`);
+          toast.success(`${file.name} uploaded successfully`);
         }
-
-        const data = await response.json();
-
-        // Add the file metadata to Firestore
-        const mediaCollection = collection(db, 'media');
-        await addDoc(mediaCollection, {
-          name: file.name,
-          type: file.type,
-          url: data.secure_url,
-          size: formatFileSize(file.size),
-          uploadDate: new Date().toISOString(),
-          publicId: data.public_id
-        });
-
-        toast.success(`${file.name} uploaded successfully`);
       } catch (error) {
         console.error('Error uploading file:', error);
         toast.error(`Failed to upload ${file.name}. Please ensure you are logged in as admin.`);
@@ -183,20 +180,36 @@ const MediaManager: React.FC = () => {
             onDragOver={handleDrag}
             onDrop={handleDrop}
           >
-            <Upload className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-            <p className="text-slate-300 mb-2">Drag and drop files here</p>
-            <p className="text-slate-400 text-sm">or</p>
-            <label className="mt-4 inline-block">
-              <input
-                type="file"
-                className="hidden"
-                multiple
-                onChange={(e) => e.target.files && handleUpload(Array.from(e.target.files))}
-              />
-              <span className="px-4 py-2 bg-emerald-500 text-white rounded-lg cursor-pointer hover:bg-emerald-600 transition-colors">
-                Select Files
-              </span>
-            </label>
+            {uploading ? (
+              <div className="space-y-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
+                <p className="text-slate-300">{progress.message}</p>
+                <div className="w-full bg-slate-700 rounded-full h-2">
+                  <div 
+                    className="bg-emerald-500 h-2 rounded-full transition-all duration-300" 
+                    style={{ width: `${progress.progress}%` }}
+                  ></div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Upload className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+                <p className="text-slate-300 mb-2">Drag and drop files here</p>
+                <p className="text-slate-400 text-sm">or</p>
+                <label className="mt-4 inline-block">
+                  <input
+                    type="file"
+                    className="hidden"
+                    multiple
+                    onChange={(e) => e.target.files && handleUpload(Array.from(e.target.files))}
+                    disabled={uploading}
+                  />
+                  <span className="px-4 py-2 bg-emerald-500 text-white rounded-lg cursor-pointer hover:bg-emerald-600 transition-colors disabled:opacity-50">
+                    Select Files
+                  </span>
+                </label>
+              </>
+            )}
           </div>
 
           {/* Media Grid */}

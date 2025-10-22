@@ -5,7 +5,7 @@ import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
-import { CLOUDINARY_CONFIG, getCloudinaryUploadUrl } from '../../lib/cloudinary';
+import { useImageUpload } from '../../hooks/useImageUpload';
 import RichTextEditor from '../../components/RichTextEditor';
 
 interface NewContentItem {
@@ -23,8 +23,16 @@ const ContentNew: React.FC = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Image upload hook with compression
+  const { uploadImage, uploading, progress } = useImageUpload({
+    folder: 'blog',
+    preset: 'featured',
+    onError: (error) => {
+      console.error('Image upload error:', error);
+    }
+  });
   const [content, setContent] = useState<NewContentItem>({
     title: '',
     type: 'home',
@@ -166,40 +174,6 @@ const ContentNew: React.FC = () => {
     return isValid;
   };
 
-  // Handle image upload
-  const handleImageUpload = async (file: File) => {
-    if (!user) {
-      toast.error('Please log in as admin to upload images');
-      return;
-    }
-
-    try {
-      setUploading(true);
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
-      formData.append('cloud_name', CLOUDINARY_CONFIG.cloudName);
-      formData.append('folder', `${CLOUDINARY_CONFIG.folder}/blog`);
-
-      const response = await fetch(getCloudinaryUploadUrl(), {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      const data = await response.json();
-      return data.secure_url;
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error('Failed to upload image');
-      return null;
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const handleTypeChange = (selectedType: 'home' | 'portfolio' | 'contact' | 'project' | 'partner' | 'blog') => {
     let newContent = {};
@@ -1166,7 +1140,7 @@ const ContentNew: React.FC = () => {
                     <div className="flex items-center gap-4">
                       <label className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-xl cursor-pointer hover:bg-emerald-600 transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-emerald-500/25">
                         <Upload className="h-4 w-4" />
-                        {uploading ? 'Uploading...' : 'Upload Image'}
+                        {uploading ? `${progress.message}...` : 'Upload Image'}
                         <input
                           type="file"
                           accept="image/*"
@@ -1174,7 +1148,7 @@ const ContentNew: React.FC = () => {
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              const url = await handleImageUpload(file);
+                              const url = await uploadImage(file);
                               if (url) {
                                 setContent(prev => ({
                                   ...prev,
