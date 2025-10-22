@@ -184,7 +184,7 @@ const Blog: React.FC = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="relative text-center max-w-5xl mx-auto mb-12"
+          className="relative text-center max-w-5xl mx-auto mb-4 md:mb-12"
         >
           {/* Background Elements */}
           <div className="absolute inset-0 -z-10">
@@ -192,18 +192,18 @@ const Blog: React.FC = () => {
             <div className="absolute bottom-0 right-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl"></div>
           </div>
           
-          <div className="relative z-10 py-4">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-full text-emerald-700 dark:text-emerald-300 text-sm font-medium mb-6">
+          <div className="relative z-10 py-1 md:py-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-full text-emerald-700 dark:text-emerald-300 text-sm font-medium mb-2 md:mb-6">
               <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
               Latest Updates
             </div>
-            <h1 className="text-3xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent leading-loose py-4">
+            <h1 className="text-2xl md:text-6xl font-bold mb-2 md:mb-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent leading-tight md:leading-loose py-1 md:py-4">
               Our Blog
             </h1>
-            <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-2xl text-slate-600 dark:text-slate-300 mb-3 md:mb-8 max-w-3xl mx-auto leading-relaxed">
               Discover insights, tutorials, and cutting-edge updates from the ANNEK TECH team
             </p>
-            <div className="flex flex-wrap justify-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex flex-wrap justify-center gap-2 md:gap-4 text-sm text-slate-500 dark:text-slate-400">
               <span className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                 {posts.length} Articles
@@ -225,7 +225,7 @@ const Blog: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-12"
+          className="mb-6 md:mb-12"
         >
           <div className="bg-white dark:bg-slate-800 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-3">
             <div className="flex flex-col lg:flex-row gap-3 mb-3">
@@ -569,7 +569,7 @@ const Blog: React.FC = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-16"
+          className="mt-8 md:mt-16"
         >
           <PersonalizedSuggestions 
             title="Recommended for You" 

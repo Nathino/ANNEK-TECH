@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, User, ArrowRight, TrendingUp, Star, Eye } from 'lucide-react';
+import { Calendar, Clock, User, ArrowRight, Star, TrendingUp, Eye } from 'lucide-react';
 import BlogSuggestionEngine, { BlogPost, SuggestionScore } from '../utils/blogSuggestions';
 import { optimizeImageUrl, FALLBACK_IMAGE } from '../utils/imageUtils';
 
@@ -18,6 +18,12 @@ const PersonalizedSuggestions: React.FC<PersonalizedSuggestionsProps> = ({
 }) => {
   const [suggestions, setSuggestions] = useState<SuggestionScore[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const getEngagementIcon = (score: number) => {
+    if (score >= 8) return <Star className="h-4 w-4 text-yellow-500" />;
+    if (score >= 5) return <TrendingUp className="h-4 w-4 text-emerald-500" />;
+    return <Eye className="h-4 w-4 text-blue-500" />;
+  };
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -66,15 +72,9 @@ const PersonalizedSuggestions: React.FC<PersonalizedSuggestionsProps> = ({
     return colors[category as keyof typeof colors] || 'bg-slate-500';
   };
 
-  const getEngagementIcon = (score: number) => {
-    if (score >= 8) return <Star className="h-4 w-4 text-yellow-500" />;
-    if (score >= 5) return <TrendingUp className="h-4 w-4 text-emerald-500" />;
-    return <Eye className="h-4 w-4 text-blue-500" />;
-  };
-
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-6 border border-emerald-200 dark:border-emerald-700/50">
+      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-2 md:p-4 border border-emerald-200 dark:border-emerald-700/50">
         <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
           <Star className="h-5 w-5 text-emerald-500" />
           {title}
@@ -105,9 +105,9 @@ const PersonalizedSuggestions: React.FC<PersonalizedSuggestionsProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-6 border border-emerald-200 dark:border-emerald-700/50"
+      className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-2 md:p-4 border border-emerald-200 dark:border-emerald-700/50"
     >
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-2 md:mb-4">
         <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <Star className="h-5 w-5 text-emerald-500" />
           {title}
@@ -117,7 +117,7 @@ const PersonalizedSuggestions: React.FC<PersonalizedSuggestionsProps> = ({
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
         {suggestions.filter(item => isValidBlogPost(item.post)).map((item, index) => (
           <motion.div
             key={item.post.id}
@@ -127,8 +127,8 @@ const PersonalizedSuggestions: React.FC<PersonalizedSuggestionsProps> = ({
             className="group"
           >
             <Link to={`/blog/${item.post.id}`} className="block">
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 border border-slate-200 dark:border-slate-700 group-hover:border-emerald-300 dark:group-hover:border-emerald-600">
-                <div className="relative overflow-hidden rounded-lg mb-3">
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-2 md:p-4 shadow-sm hover:shadow-md transition-all duration-300 border border-slate-200 dark:border-slate-700 group-hover:border-emerald-300 dark:group-hover:border-emerald-600">
+                <div className="relative overflow-hidden rounded-lg mb-2">
                   <img
                     src={optimizeImageUrl(item.post.content.featuredImage || FALLBACK_IMAGE, 300, 200)}
                     alt={item.post.title}
@@ -153,7 +153,7 @@ const PersonalizedSuggestions: React.FC<PersonalizedSuggestionsProps> = ({
                   </div>
                 </div>
                 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <h4 className="text-lg font-semibold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
                     {item.post.title}
                   </h4>
@@ -200,7 +200,7 @@ const PersonalizedSuggestions: React.FC<PersonalizedSuggestionsProps> = ({
         ))}
       </div>
       
-      <div className="mt-6 text-center">
+      <div className="mt-2 md:mt-4 text-center">
         <Link
           to="/blog"
           className="inline-flex items-center gap-2 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors"

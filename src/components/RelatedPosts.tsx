@@ -92,14 +92,14 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700"
+      className="bg-white dark:bg-slate-800 rounded-xl p-4 md:p-6 border border-slate-200 dark:border-slate-700"
     >
-      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4 md:mb-6 flex items-center gap-2">
         <TrendingUp className="h-5 w-5 text-emerald-500" />
         {title}
       </h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {relatedPosts.map((item, index) => (
           <motion.div
             key={item.post.id}
@@ -109,7 +109,7 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({
             className="group"
           >
             <Link to={`/blog/${item.post.id}`} className="block">
-              <div className="relative overflow-hidden rounded-lg mb-3">
+              <div className="relative overflow-hidden rounded-lg mb-2 md:mb-3">
                 <img
                   src={optimizeImageUrl(item.post.content.featuredImage || FALLBACK_IMAGE, 300, 200)}
                   alt={item.post.title}
@@ -178,7 +178,7 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({
         ))}
       </div>
       
-      <div className="mt-6 text-center">
+      <div className="mt-4 md:mt-6 text-center">
         <Link
           to="/blog"
           className="inline-flex items-center gap-2 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors"

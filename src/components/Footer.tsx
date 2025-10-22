@@ -36,18 +36,18 @@ const Footer: React.FC = () => {
             <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text mb-4">
               Quick Links
             </h3>
-            <ul className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:grid-cols-1 md:space-y-3 md:gap-0">
+            <ul className="grid grid-cols-4 gap-1 md:grid-cols-1 md:space-y-3 md:gap-0">
               <li>
-                <Link to="/" className="hover:text-emerald-400 transition-colors text-center md:text-left block">HOME</Link>
+                <Link to="/" className="hover:text-emerald-400 transition-colors text-center md:text-left block text-xs md:text-base">HOME</Link>
               </li>
               <li>
-                <Link to="/portfolio" className="hover:text-emerald-400 transition-colors text-center md:text-left block">PORTFOLIO</Link>
+                <Link to="/portfolio" className="hover:text-emerald-400 transition-colors text-center md:text-left block text-xs md:text-base">PORTFOLIO</Link>
               </li>
               <li>
-                <Link to="/blog" className="hover:text-emerald-400 transition-colors text-center md:text-left block">BLOG</Link>
+                <Link to="/blog" className="hover:text-emerald-400 transition-colors text-center md:text-left block text-xs md:text-base">BLOG</Link>
               </li>
               <li>
-                <Link to="/contact" className="hover:text-emerald-400 transition-colors text-center md:text-left block">CONTACT</Link>
+                <Link to="/contact" className="hover:text-emerald-400 transition-colors text-center md:text-left block text-xs md:text-base">CONTACT</Link>
               </li>
             </ul>
           </div>

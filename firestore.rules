@@ -67,6 +67,13 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();  // Only admin can manage partner submissions
     }
     
+    // Comments collection rules
+    match /comments/{document=**} {
+      allow read: if true;  // Anyone can read comments
+      allow create: if true;  // Anyone can create comments
+      allow update, delete: if isAdmin();  // Only admin can modify/delete comments
+    }
+    
     // Default rule - deny everything else
     match /{document=**} {
       allow read, write: if false;

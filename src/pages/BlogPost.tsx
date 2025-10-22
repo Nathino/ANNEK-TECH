@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, User, ArrowLeft, Tag, Eye, Heart, Share2, MessageCircle } from 'lucide-react';
-import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
+import { Calendar, Clock, User, ArrowLeft, Tag, Eye, Heart, Share2, MessageCircle, Twitter, Facebook, Linkedin, MessageCircle as WhatsApp, Send, Copy } from 'lucide-react';
+import { doc, getDoc, updateDoc, increment, collection, query, where, orderBy, onSnapshot, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import toast from 'react-hot-toast';
 import SEOMonitor from '../components/SEOMonitor';
@@ -39,6 +40,7 @@ const BlogPost: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<Array<{id: string, name: string, email: string, comment: string, createdAt: string}>>([]);
 
@@ -84,6 +86,54 @@ const BlogPost: React.FC = () => {
     }
   }, [readingTime, readingProgress]);
 
+  // Fetch comments function
+  const fetchComments = useCallback(() => {
+    if (!id) return;
+
+    const commentsQuery = query(
+      collection(db, 'comments'),
+      where('postId', '==', id),
+      orderBy('createdAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(commentsQuery, 
+      (snapshot) => {
+        const commentsData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Array<{id: string, name: string, email: string, comment: string, createdAt: string, postId: string}>;
+        
+        setComments(commentsData);
+      },
+      (error) => {
+        console.error('Error fetching comments:', error);
+        toast.error('Failed to load comments');
+      }
+    );
+
+    return unsubscribe;
+  }, [id]);
+
+  // Store unsubscribe function for cleanup
+  const [unsubscribeComments, setUnsubscribeComments] = useState<(() => void) | null>(null);
+
+  // Close share modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showShareModal) {
+        const target = event.target as Element;
+        if (target.classList.contains('share-modal-overlay')) {
+          setShowShareModal(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showShareModal]);
+
   useEffect(() => {
     const fetchPost = async () => {
       if (!id) return;
@@ -110,6 +160,12 @@ const BlogPost: React.FC = () => {
             setTimeout(() => {
               startReading();
             }, 3000);
+
+            // Fetch comments for this post
+            const unsubscribe = fetchComments();
+            if (unsubscribe) {
+              setUnsubscribeComments(() => unsubscribe);
+            }
 
             // Track view
             try {
@@ -317,8 +373,12 @@ const BlogPost: React.FC = () => {
     // Cleanup on unmount
     return () => {
       stopReading();
+      // Cleanup comments listener
+      if (unsubscribeComments) {
+        unsubscribeComments();
+      }
     };
-  }, [id]); // Remove stopReading from dependencies to prevent infinite loop
+  }, [id, fetchComments]); // Add fetchComments to dependencies
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -350,10 +410,15 @@ const BlogPost: React.FC = () => {
     }
   };
 
-  const handleShare = async () => {
+  const handleShare = async (platform: string) => {
     if (!post) return;
     
+    const url = window.location.href;
+    const title = post.title;
+    const text = post.content.excerpt;
+    
     try {
+      // Update share count in Firestore
       const docRef = doc(db, 'content', post.id);
       await updateDoc(docRef, {
         shares: increment(1)
@@ -364,9 +429,35 @@ const BlogPost: React.FC = () => {
         shares: (prev.shares || 0) + 1
       } : null);
       
-      // Copy URL to clipboard
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success('Link copied to clipboard!');
+      // Handle different sharing platforms
+      if (platform === 'twitter') {
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
+        window.open(twitterUrl, '_blank', 'width=600,height=400');
+        toast.success('Shared to Twitter!');
+      } else if (platform === 'facebook') {
+        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        window.open(facebookUrl, '_blank', 'width=600,height=400');
+        toast.success('Shared to Facebook!');
+      } else if (platform === 'linkedin') {
+        const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+        window.open(linkedinUrl, '_blank', 'width=600,height=400');
+        toast.success('Shared to LinkedIn!');
+      } else if (platform === 'whatsapp') {
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${title}\n\n${text}\n\n${url}`)}`;
+        window.open(whatsappUrl, '_blank', 'width=600,height=400');
+        toast.success('Shared to WhatsApp!');
+      } else if (platform === 'telegram') {
+        const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`${title}\n\n${text}`)}`;
+        window.open(telegramUrl, '_blank', 'width=600,height=400');
+        toast.success('Shared to Telegram!');
+      } else if (platform === 'copy') {
+        // Copy URL to clipboard
+        await navigator.clipboard.writeText(url);
+        toast.success('Link copied to clipboard!');
+      }
+      
+      // Close modal after sharing
+      setShowShareModal(false);
     } catch (error) {
       console.error('Error sharing:', error);
       toast.error('Failed to share');
@@ -378,16 +469,19 @@ const BlogPost: React.FC = () => {
     if (!newComment.trim() || !post) return;
     
     try {
-      // In a real app, you'd save to Firestore
-      const comment = {
-        id: Date.now().toString(),
+      // Save comment to Firestore
+      const commentData = {
+        postId: post.id,
         name: 'Anonymous User',
         email: 'user@example.com',
-        comment: newComment,
+        comment: newComment.trim(),
         createdAt: new Date().toISOString()
       };
       
-      setComments(prev => [comment, ...prev]);
+      // Add comment to Firestore
+      await addDoc(collection(db, 'comments'), commentData);
+      
+      // Clear form
       setNewComment('');
       
       // Update comment count
@@ -445,7 +539,7 @@ const BlogPost: React.FC = () => {
           url: window.location.href
         }}
       />
-      <div className="w-full max-w-none px-2 sm:px-4 lg:px-8 xl:px-12 py-4 md:py-8">
+      <div className="w-full max-w-none px-3 sm:px-4 lg:px-8 xl:px-12 py-5 md:py-8">
         {/* Back Button */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -475,7 +569,7 @@ const BlogPost: React.FC = () => {
               src={optimizeImageUrl(post.content.featuredImage || FALLBACK_IMAGE, 1200, 600)}
               alt={post.title}
               className="w-full h-full object-cover"
-              loading="lazy"
+              loading="eager"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = FALLBACK_IMAGE;
@@ -554,7 +648,7 @@ const BlogPost: React.FC = () => {
               </button>
               
               <button
-                onClick={handleShare}
+                onClick={() => setShowShareModal(true)}
                 className="flex items-center gap-1 px-1.5 md:px-4 py-0.5 md:py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-md md:rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200 font-medium text-xs md:text-sm hover:shadow-lg"
               >
                 <Share2 className="h-2.5 w-2.5 md:h-5 md:w-5" />
@@ -589,9 +683,9 @@ const BlogPost: React.FC = () => {
               className="mb-4 md:mb-8"
             >
               <div className="bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-xl md:rounded-2xl shadow-lg md:shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <div className="p-4 md:p-6 lg:p-8">
+                <div className="p-2 md:p-6 lg:p-8">
                   <div 
-                    className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-slate-900 dark:prose-headings:text-white prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-a:text-emerald-600 dark:prose-a:text-emerald-400 prose-strong:text-slate-900 dark:prose-strong:text-white prose-code:text-slate-900 dark:prose-code:text-white prose-code:bg-slate-100 dark:prose-code:bg-slate-700 prose-pre:bg-slate-100 dark:prose-pre:bg-slate-700 prose-blockquote:border-emerald-500 prose-blockquote:text-slate-700 dark:prose-blockquote:text-slate-300 prose-ul:text-slate-700 dark:prose-ul:text-slate-300 prose-ol:text-slate-700 dark:prose-ol:text-slate-300 prose-li:text-slate-700 dark:prose-li:text-slate-300 leading-relaxed"
+                    className="blog-content"
                     dangerouslySetInnerHTML={{ __html: post.content.content }}
                   />
                 </div>
@@ -742,7 +836,7 @@ const BlogPost: React.FC = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.4 }}
-            className="mb-8 md:mb-12"
+            className="mt-6 md:mt-8 mb-4 md:mb-8"
           >
             <RelatedPosts currentPost={post} />
           </motion.div>
@@ -779,6 +873,125 @@ const BlogPost: React.FC = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && createPortal(
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="share-modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowShareModal(false);
+            }
+          }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-sm md:max-w-sm max-w-xs"
+          >
+            <div className="p-3 md:p-4">
+              <div className="flex items-center justify-between mb-3 md:mb-4">
+                <h3 className="text-base md:text-lg font-bold text-slate-900 dark:text-white">Share Article</h3>
+                <button
+                  onClick={() => setShowShareModal(false)}
+                  className="p-1 md:p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-1.5 md:space-y-2">
+                <button
+                  onClick={() => handleShare('twitter')}
+                  className="w-full flex items-center gap-2 md:gap-3 px-2 md:px-3 py-1.5 md:py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+                >
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-blue-400 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Twitter className="h-3 w-3 md:h-4 md:w-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white text-xs md:text-sm">Twitter</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 hidden md:block">Share on Twitter</div>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => handleShare('facebook')}
+                  className="w-full flex items-center gap-2 md:gap-3 px-2 md:px-3 py-1.5 md:py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+                >
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-blue-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Facebook className="h-3 w-3 md:h-4 md:w-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white text-xs md:text-sm">Facebook</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 hidden md:block">Share on Facebook</div>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => handleShare('linkedin')}
+                  className="w-full flex items-center gap-2 md:gap-3 px-2 md:px-3 py-1.5 md:py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+                >
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-blue-700 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Linkedin className="h-3 w-3 md:h-4 md:w-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white text-xs md:text-sm">LinkedIn</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 hidden md:block">Share on LinkedIn</div>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => handleShare('whatsapp')}
+                  className="w-full flex items-center gap-2 md:gap-3 px-2 md:px-3 py-1.5 md:py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+                >
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-green-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <WhatsApp className="h-3 w-3 md:h-4 md:w-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white text-xs md:text-sm">WhatsApp</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 hidden md:block">Share on WhatsApp</div>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => handleShare('telegram')}
+                  className="w-full flex items-center gap-2 md:gap-3 px-2 md:px-3 py-1.5 md:py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+                >
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-blue-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Send className="h-3 w-3 md:h-4 md:w-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white text-xs md:text-sm">Telegram</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 hidden md:block">Share on Telegram</div>
+                  </div>
+                </button>
+                
+                <div className="border-t border-slate-200 dark:border-slate-700 my-1.5 md:my-2"></div>
+                
+                <button
+                  onClick={() => handleShare('copy')}
+                  className="w-full flex items-center gap-2 md:gap-3 px-2 md:px-3 py-1.5 md:py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+                >
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-slate-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Copy className="h-3 w-3 md:h-4 md:w-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white text-xs md:text-sm">Copy Link</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 hidden md:block">Copy article URL</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>,
+        document.body
+      )}
     </div>
   );
 };

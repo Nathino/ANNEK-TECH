@@ -139,3 +139,376 @@ html {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
+
+/* Blog content styling to preserve Quill editor formatting */
+.blog-content {
+  font-size: 13px !important; /* Mobile font size */
+  line-height: 1.6 !important;
+  color: #374151 !important;
+  font-family: inherit !important;
+}
+
+.dark .blog-content {
+  color: #d1d5db !important;
+}
+
+/* Override any Quill editor styles that might be affecting the content */
+.blog-content * {
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+/* Desktop font size */
+@media (min-width: 768px) {
+  .blog-content {
+    font-size: 16px !important;
+  }
+  
+  .blog-content * {
+    font-size: inherit !important;
+  }
+}
+
+/* Preserve Quill editor formatting */
+.blog-content h1 {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin: 1.5rem 0 1rem 0 !important;
+  line-height: 1.3 !important;
+}
+
+.dark .blog-content h1 {
+  color: #f8fafc !important;
+}
+
+.blog-content h2 {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
+  margin: 1.25rem 0 0.75rem 0 !important;
+  line-height: 1.4 !important;
+}
+
+.dark .blog-content h2 {
+  color: #f8fafc !important;
+}
+
+.blog-content h3 {
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
+  margin: 1rem 0 0.5rem 0 !important;
+  line-height: 1.4 !important;
+}
+
+.dark .blog-content h3 {
+  color: #f8fafc !important;
+}
+
+.blog-content p {
+  margin: 0.75rem 0 !important;
+  color: #374151 !important;
+  font-size: inherit !important;
+}
+
+.dark .blog-content p {
+  color: #d1d5db !important;
+}
+
+.blog-content ul {
+  margin: 0.75rem 0 !important;
+  padding-left: 1.5rem !important;
+  font-size: inherit !important;
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+}
+
+.blog-content ol {
+  margin: 0.75rem 0 !important;
+  padding-left: 1.5rem !important;
+  font-size: inherit !important;
+  list-style-type: decimal !important;
+  list-style-position: outside !important;
+}
+
+.blog-content li {
+  margin: 0.25rem 0 !important;
+  color: #374151 !important;
+  font-size: inherit !important;
+  display: list-item !important;
+  list-style-position: outside !important;
+}
+
+.dark .blog-content li {
+  color: #d1d5db !important;
+}
+
+.blog-content a {
+  color: #059669;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.dark .blog-content a {
+  color: #10b981;
+}
+
+.blog-content a:hover {
+  color: #047857;
+}
+
+.dark .blog-content a:hover {
+  color: #34d399;
+}
+
+.blog-content strong, .blog-content b {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.dark .blog-content strong, .dark .blog-content b {
+  color: #f8fafc;
+}
+
+.blog-content em, .blog-content i {
+  font-style: italic;
+}
+
+.blog-content u {
+  text-decoration: underline;
+}
+
+.blog-content s {
+  text-decoration: line-through;
+}
+
+.blog-content blockquote {
+  border-left: 4px solid #059669;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: #6b7280;
+  background-color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+.dark .blog-content blockquote {
+  color: #9ca3af;
+  background-color: #1f2937;
+  border-left-color: #10b981;
+}
+
+.blog-content code {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875em;
+}
+
+.dark .blog-content code {
+  background-color: #374151;
+  color: #f9fafb;
+}
+
+.blog-content pre {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.dark .blog-content pre {
+  background-color: #374151;
+  color: #f9fafb;
+}
+
+.blog-content pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dark .blog-content img {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+/* Quill editor specific classes */
+.blog-content .ql-align-center {
+  text-align: center !important;
+}
+
+.blog-content .ql-align-right {
+  text-align: right !important;
+}
+
+.blog-content .ql-align-justify {
+  text-align: justify !important;
+}
+
+.blog-content .ql-indent-1 {
+  padding-left: 1.5rem !important;
+}
+
+.blog-content .ql-indent-2 {
+  padding-left: 3rem !important;
+}
+
+.blog-content .ql-indent-3 {
+  padding-left: 4.5rem !important;
+}
+
+.blog-content .ql-indent-4 {
+  padding-left: 6rem !important;
+}
+
+/* Override any Quill editor global styles that might affect our content */
+.blog-content .ql-editor {
+  font-size: inherit !important;
+  line-height: inherit !important;
+  color: inherit !important;
+  font-family: inherit !important;
+}
+
+.blog-content .ql-snow {
+  font-size: inherit !important;
+  line-height: inherit !important;
+  color: inherit !important;
+  font-family: inherit !important;
+}
+
+/* Override any Quill editor content styles */
+.blog-content .ql-editor p,
+.blog-content .ql-editor div,
+.blog-content .ql-editor span,
+.blog-content .ql-editor h1,
+.blog-content .ql-editor h2,
+.blog-content .ql-editor h3,
+.blog-content .ql-editor h4,
+.blog-content .ql-editor h5,
+.blog-content .ql-editor h6,
+.blog-content .ql-editor ul,
+.blog-content .ql-editor ol,
+.blog-content .ql-editor li {
+  font-size: inherit !important;
+  line-height: inherit !important;
+  color: inherit !important;
+  font-family: inherit !important;
+}
+
+/* Ensure all text elements inherit the base font size */
+.blog-content div,
+.blog-content span,
+.blog-content p,
+.blog-content ul,
+.blog-content ol,
+.blog-content li,
+.blog-content a,
+.blog-content strong,
+.blog-content em,
+.blog-content u,
+.blog-content s {
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+/* Nested list support */
+.blog-content ul ul {
+  list-style-type: circle !important;
+  margin: 0.25rem 0 !important;
+}
+
+.blog-content ul ul ul {
+  list-style-type: square !important;
+}
+
+.blog-content ol ol {
+  list-style-type: lower-alpha !important;
+  margin: 0.25rem 0 !important;
+}
+
+.blog-content ol ol ol {
+  list-style-type: lower-roman !important;
+}
+
+/* Quill editor list classes */
+.blog-content .ql-list.ql-bullet {
+  list-style-type: disc !important;
+}
+
+.blog-content .ql-list.ql-ordered {
+  list-style-type: decimal !important;
+}
+
+/* Ensure list items are properly displayed */
+.blog-content ul li,
+.blog-content ol li {
+  display: list-item !important;
+  list-style-position: outside !important;
+}
+
+/* Prevent Microsoft Edge lazy loading intervention */
+img {
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 200px;
+}
+
+/* Ensure images load properly without Edge intervention */
+img[loading="lazy"] {
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 200px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 767px) {
+  .blog-content h1 {
+    font-size: 1.25rem;
+  }
+  
+  .blog-content h2 {
+    font-size: 1.125rem;
+  }
+  
+  .blog-content h3 {
+    font-size: 1rem;
+  }
+  
+  .blog-content blockquote {
+    padding: 0.75rem;
+    margin: 0.75rem 0;
+  }
+  
+  .blog-content pre {
+    padding: 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Mobile list adjustments */
+  .blog-content ul,
+  .blog-content ol {
+    padding-left: 1.25rem !important;
+  }
+  
+  .blog-content ul ul,
+  .blog-content ol ol {
+    padding-left: 1rem !important;
+  }
+}

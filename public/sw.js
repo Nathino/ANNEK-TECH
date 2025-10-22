@@ -197,7 +197,9 @@ function isStaticFile(url) {
          url.endsWith('.jpg') || 
          url.endsWith('.jpeg') || 
          url.endsWith('.gif') || 
-         url.endsWith('.svg');
+         url.endsWith('.svg') ||
+         url.includes('unsplash.com') ||
+         url.includes('images.unsplash.com');
 }
 
 function isApiRequest(url) {
