@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, RefreshCw, User } from 'lucide-react';
+import { useIsMobile } from '../hooks/useIsMobile';
+import { useAppRefresh } from '../hooks/useAppRefresh';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const location = useLocation();
+  const isMobile = useIsMobile();
+  const { refreshApp, isRefreshing } = useAppRefresh();
 
   useEffect(() => {
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -29,6 +34,11 @@ export default function Navbar() {
   // Close mobile menu when route changes
   useEffect(() => {
     setIsOpen(false);
+  }, [location]);
+
+  // Close user menu when route changes
+  useEffect(() => {
+    setShowUserMenu(false);
   }, [location]);
 
   const toggleTheme = () => {
@@ -88,7 +98,17 @@ export default function Navbar() {
                   )}
                 </Link>
               ))}
-              <div className="ml-6 pl-4 border-l border-slate-200 dark:border-slate-700">
+              <div className="ml-6 pl-4 border-l border-slate-200 dark:border-slate-700 flex items-center space-x-2">
+                {/* Refresh Button - Desktop */}
+                <button
+                  onClick={refreshApp}
+                  disabled={isRefreshing}
+                  className="p-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Refresh App"
+                >
+                  <RefreshCw className={`h-5 w-5 text-emerald-600 dark:text-emerald-400 group-hover:rotate-180 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : ''}`} />
+                </button>
+                
                 <button
                   onClick={toggleTheme}
                   className="p-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200 group"
@@ -99,11 +119,57 @@ export default function Navbar() {
                     <Moon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 group-hover:rotate-12 transition-transform duration-300" />
                   }
                 </button>
+
+                {/* User Menu - Desktop */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="p-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200 group"
+                    title="User Menu"
+                  >
+                    <User className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  </button>
+
+                  {showUserMenu && (
+                    <>
+                      {/* Backdrop */}
+                      <div 
+                        className="fixed inset-0 bg-black/20 z-40"
+                        onClick={() => setShowUserMenu(false)}
+                      />
+                      
+                      {/* Dropdown Menu */}
+                      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
+                        <button
+                          onClick={() => {
+                            refreshApp();
+                            setShowUserMenu(false);
+                          }}
+                          disabled={isRefreshing}
+                          className="w-full px-4 py-3 text-left text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                          <span>{isRefreshing ? 'Refreshing...' : 'Refresh App'}</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="md:hidden flex items-center space-x-3">
+          <div className="md:hidden flex items-center space-x-2">
+            {/* Refresh Button - Mobile */}
+            <button
+              onClick={refreshApp}
+              disabled={isRefreshing}
+              className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              title={isMobile ? "Pull down to refresh or tap to refresh" : "Refresh App"}
+            >
+              <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
+
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200"
@@ -114,6 +180,43 @@ export default function Navbar() {
                 <Moon className="h-5 w-5" />
               }
             </button>
+
+            {/* User Menu - Mobile */}
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200"
+                title="User Menu"
+              >
+                <User className="h-5 w-5" />
+              </button>
+
+              {showUserMenu && (
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className="fixed inset-0 bg-black/50 z-40"
+                    onClick={() => setShowUserMenu(false)}
+                  />
+                  
+                  {/* Dropdown Menu */}
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
+                    <button
+                      onClick={() => {
+                        refreshApp();
+                        setShowUserMenu(false);
+                      }}
+                      disabled={isRefreshing}
+                      className="w-full px-4 py-3 text-left text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                      <span>{isRefreshing ? 'Refreshing...' : 'Refresh App'}</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-md text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200"
@@ -154,6 +257,16 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Refresh Indicator */}
+      {isMobile && isRefreshing && (
+        <div className="fixed top-16 left-0 right-0 z-50 bg-emerald-500 text-white text-center py-2 text-sm font-medium">
+          <div className="flex items-center justify-center space-x-2">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            <span>Refreshing app...</span>
           </div>
         </div>
       )}

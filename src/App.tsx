@@ -14,6 +14,7 @@ import Login from './pages/admin/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import PWAStatus from './components/PWAStatus';
+import PullToRefresh from './components/PullToRefresh';
 
 // Lazy load admin pages for better performance
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -39,39 +40,42 @@ const AppRoutes: React.FC = () => {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
-      <Toaster position="top-right" />
-      {!isAdminRoute && <Navbar />}
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/portfolio" element={<Portfolio />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:id" element={<BlogPost />} />
-        <Route path="/sitemap" element={<Sitemap />} />
+    <PullToRefresh>
+      <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
+        <Toaster position="top-right" />
+        {!isAdminRoute && <Navbar />}
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogPost />} />
+          <Route path="/sitemap" element={<Sitemap />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin/*" element={<AdminLayout />}>
+            <Route path="dashboard" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><Dashboard /></Suspense></ProtectedRoute>} />
+                  <Route path="content" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><ContentManager /></Suspense></ProtectedRoute>} />
+                  <Route path="content/new" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><ContentNew /></Suspense></ProtectedRoute>} />
+                  <Route path="content/edit/:id" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><ContentEdit /></Suspense></ProtectedRoute>} />
+                  <Route path="blog" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><BlogManagement /></Suspense></ProtectedRoute>} />
+                  <Route path="blog/analytics" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><BlogAnalytics /></Suspense></ProtectedRoute>} />
+                  <Route path="media" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><MediaManager /></Suspense></ProtectedRoute>} />
+                  <Route path="messages" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><Messages /></Suspense></ProtectedRoute>} />
+                  <Route path="settings" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><Settings /></Suspense></ProtectedRoute>} />
+                  <Route path="seo" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><SEOMonitor /></Suspense></ProtectedRoute>} />
+            <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+          </Route>
+        </Routes>
+        {!isAdminRoute && <Footer />}
         
-        {/* Admin Routes */}
-        <Route path="/admin/login" element={<Login />} />
-        <Route path="/admin/*" element={<AdminLayout />}>
-          <Route path="dashboard" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><Dashboard /></Suspense></ProtectedRoute>} />
-                <Route path="content" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><ContentManager /></Suspense></ProtectedRoute>} />
-                <Route path="content/new" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><ContentNew /></Suspense></ProtectedRoute>} />
-                <Route path="content/edit/:id" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><ContentEdit /></Suspense></ProtectedRoute>} />
-                <Route path="blog" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><BlogManagement /></Suspense></ProtectedRoute>} />
-                <Route path="blog/analytics" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><BlogAnalytics /></Suspense></ProtectedRoute>} />
-                <Route path="media" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><MediaManager /></Suspense></ProtectedRoute>} />
-                <Route path="messages" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><Messages /></Suspense></ProtectedRoute>} />
-                <Route path="settings" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><Settings /></Suspense></ProtectedRoute>} />
-                <Route path="seo" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><SEOMonitor /></Suspense></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-        </Route>
-      </Routes>
-      {!isAdminRoute && <Footer />}
-      
-      {/* PWA Components */}
-      <PWAInstallPrompt />
-    </div>
+        {/* PWA Components */}
+        <PWAInstallPrompt />
+        <PWAStatus />
+      </div>
+    </PullToRefresh>
   );
 };
 
