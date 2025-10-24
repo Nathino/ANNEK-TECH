@@ -13,7 +13,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import PWAStatus from '../../components/PWAStatus';
+import { useSEOMonitoring } from '../../hooks/useSEOMonitoring';
 
 interface BlogPost {
   id: string;
@@ -72,6 +72,13 @@ const Dashboard: React.FC = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const [retryCount, setRetryCount] = useState(0);
   const navigate = useNavigate();
+  
+  // Get real SEO data
+  const {
+    metrics: seoMetrics,
+    getOverallScore,
+    getTotalIssues
+  } = useSEOMonitoring();
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     stats: {
       totalContent: 0,
@@ -119,10 +126,10 @@ const Dashboard: React.FC = () => {
         sum + (blog.likes || 0) + (blog.shares || 0) + (blog.comments || 0), 0
       );
 
-      // Get recent content (last 5 items)
+      // Get recent content (last 10 items)
       const recentContent = allContent
         .sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
-        .slice(0, 5)
+        .slice(0, 10)
         .map(item => ({
           id: item.id,
           title: item.title,
@@ -132,11 +139,11 @@ const Dashboard: React.FC = () => {
           views: item.views || 0
         }));
 
-      // Get top blog posts by views
+      // Get top blog posts by views (top 10)
       const topBlogPosts = blogs
         .filter(blog => blog.status === 'published')
         .sort((a, b) => (b.views || 0) - (a.views || 0))
-        .slice(0, 5);
+        .slice(0, 10);
 
       // Calculate category stats
       const categoryCounts = blogs.reduce((acc, blog) => {
@@ -227,10 +234,10 @@ const Dashboard: React.FC = () => {
   ];
 
   const seoStats = [
-    { name: 'SEO Score', value: '92/100', icon: Search, color: 'emerald', iconClass: 'text-emerald-400', bgClass: 'bg-emerald-400/10', ringClass: 'ring-emerald-400/20' },
-    { name: 'Pages Monitored', value: '8', icon: Eye, color: 'blue', iconClass: 'text-blue-400', bgClass: 'bg-blue-400/10', ringClass: 'ring-blue-400/20' },
-    { name: 'Issues Found', value: '3', icon: TrendingUp, color: 'red', iconClass: 'text-red-400', bgClass: 'bg-red-400/10', ringClass: 'ring-red-400/20' },
-    { name: 'Performance', value: 'Good', icon: Heart, color: 'green', iconClass: 'text-green-400', bgClass: 'bg-green-400/10', ringClass: 'ring-green-400/20' }
+    { name: 'SEO Score', value: `${getOverallScore()}/100`, icon: Search, color: 'emerald', iconClass: 'text-emerald-400', bgClass: 'bg-emerald-400/10', ringClass: 'ring-emerald-400/20' },
+    { name: 'Pages Monitored', value: seoMetrics.length.toString(), icon: Eye, color: 'blue', iconClass: 'text-blue-400', bgClass: 'bg-blue-400/10', ringClass: 'ring-blue-400/20' },
+    { name: 'Issues Found', value: getTotalIssues().toString(), icon: TrendingUp, color: 'red', iconClass: 'text-red-400', bgClass: 'bg-red-400/10', ringClass: 'ring-red-400/20' },
+    { name: 'Performance', value: getTotalIssues() === 0 ? 'Excellent' : getTotalIssues() <= 2 ? 'Good' : 'Needs Attention', icon: Heart, color: 'green', iconClass: 'text-green-400', bgClass: 'bg-green-400/10', ringClass: 'ring-green-400/20' }
   ];
 
 
@@ -264,15 +271,12 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-3 pt-8">
+    <div className="p-3 pt-4">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 md:mb-4">
           <div className="w-full sm:w-auto">
             <h1 className="text-2xl md:text-3xl font-bold text-emerald-400">Dashboard</h1>
             <p className="text-slate-400 text-sm md:text-base">Welcome back, Admin</p>
-          </div>
-          <div className="mt-2 sm:mt-0 w-full sm:w-auto">
-            <PWAStatus showInstallButton={true} />
           </div>
           <div className="flex gap-1 md:gap-2 bg-slate-800/50 rounded-lg p-1 shadow-md mt-2 sm:mt-0 w-full sm:w-auto justify-center sm:justify-end">
             <button
@@ -322,7 +326,7 @@ const Dashboard: React.FC = () => {
         ) : activeSection === 'overview' ? (
           <>
             {/* Main Stats Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-4 md:mb-8 w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-3 md:mb-6 w-full">
               {stats.map((stat) => (
                 <div
                   key={stat.name}
@@ -333,15 +337,15 @@ const Dashboard: React.FC = () => {
                     <stat.icon className={`h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 ${stat.iconClass}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs md:text-sm font-medium text-slate-400 mb-1 truncate">{stat.name}</p>
-                    <p className="text-base md:text-lg lg:text-2xl font-bold text-slate-200 truncate">{stat.value || '—'}</p>
+                    <p className="text-xs md:text-sm font-medium text-slate-400 mb-1 break-words">{stat.name}</p>
+                    <p className="text-base md:text-lg lg:text-2xl font-bold text-slate-200 break-words">{stat.value || '—'}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Blog Stats Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-4 md:mb-8 w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-3 md:mb-6 w-full">
               {blogStats.map((stat) => (
                 <div
                   key={stat.name}
@@ -352,15 +356,15 @@ const Dashboard: React.FC = () => {
                     <stat.icon className={`h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 ${stat.iconClass}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs md:text-sm font-medium text-slate-400 mb-1 truncate">{stat.name}</p>
-                    <p className="text-base md:text-lg lg:text-2xl font-bold text-slate-200 truncate">{stat.value || '—'}</p>
+                    <p className="text-xs md:text-sm font-medium text-slate-400 mb-1 break-words">{stat.name}</p>
+                    <p className="text-base md:text-lg lg:text-2xl font-bold text-slate-200 break-words">{stat.value || '—'}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* SEO Stats Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-4 md:mb-8 w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-3 md:mb-6 w-full">
               {seoStats.map((stat) => (
                 <div
                   key={stat.name}
@@ -371,8 +375,8 @@ const Dashboard: React.FC = () => {
                     <stat.icon className={`h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 ${stat.iconClass}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs md:text-sm font-medium text-slate-400 mb-1 truncate">{stat.name}</p>
-                    <p className="text-base md:text-lg lg:text-2xl font-bold text-slate-200 truncate">{stat.value || '—'}</p>
+                    <p className="text-xs md:text-sm font-medium text-slate-400 mb-1 break-words">{stat.name}</p>
+                    <p className="text-base md:text-lg lg:text-2xl font-bold text-slate-200 break-words">{stat.value || '—'}</p>
                   </div>
                 </div>
               ))}
@@ -382,7 +386,7 @@ const Dashboard: React.FC = () => {
               {/* Recent Content */}
               <div className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 shadow-lg">
                 <div className="p-3 md:p-6 border-b border-slate-700/50">
-                  <h2 className="text-lg md:text-xl font-semibold text-slate-200">Recent Content</h2>
+                  <h2 className="text-lg md:text-xl font-semibold text-emerald-400">Recent Content</h2>
                 </div>
                 {dashboardData.recentContent.length > 0 ? (
                   <div className="divide-y divide-slate-700/50">
@@ -401,7 +405,12 @@ const Dashboard: React.FC = () => {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-slate-200 font-medium group-hover:text-emerald-400 transition-colors truncate">{item.title}</p>
+                            <p 
+                              className="text-slate-200 font-medium group-hover:text-emerald-400 transition-colors break-words leading-tight"
+                              title={item.title}
+                            >
+                              {item.title}
+                            </p>
                             <p className="text-sm text-slate-400 capitalize">{item.type} • {item.status}</p>
                           </div>
                         </div>
@@ -423,7 +432,7 @@ const Dashboard: React.FC = () => {
               {/* Top Blog Posts */}
               <div className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 shadow-lg">
                 <div className="p-3 md:p-6 border-b border-slate-700/50">
-                  <h2 className="text-lg md:text-xl font-semibold text-slate-200">Top Blog Posts</h2>
+                  <h2 className="text-lg md:text-xl font-semibold text-emerald-400">Top Blog Posts</h2>
                 </div>
                 {dashboardData.topBlogPosts.length > 0 ? (
                   <div className="divide-y divide-slate-700/50">
@@ -438,7 +447,12 @@ const Dashboard: React.FC = () => {
                             {index + 1}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-slate-200 font-medium group-hover:text-emerald-400 transition-colors truncate">{post.title}</p>
+                            <p 
+                              className="text-slate-200 font-medium group-hover:text-emerald-400 transition-colors break-words leading-tight"
+                              title={post.title}
+                            >
+                              {post.title}
+                            </p>
                             <p className="text-sm text-slate-400">{post.content?.category || 'General'}</p>
                           </div>
                         </div>

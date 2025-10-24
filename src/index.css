@@ -5,10 +5,23 @@
 @layer base {
   html {
     @apply antialiased scroll-smooth;
+    background-color: #0f172a; /* slate-900 */
   }
   
   body {
-    @apply overflow-x-hidden bg-slate-50 dark:bg-slate-900;
+    @apply overflow-x-hidden bg-slate-900;
+    background-color: #0f172a; /* slate-900 */
+  }
+  
+  /* Prevent white lines at scroll boundaries */
+  * {
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #0f172a; /* slate-900 */
   }
 }
 

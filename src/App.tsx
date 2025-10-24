@@ -13,7 +13,6 @@ import AdminLayout from './components/AdminLayout';
 import Login from './pages/admin/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
-import PWAStatus from './components/PWAStatus';
 import PullToRefresh from './components/PullToRefresh';
 
 // Lazy load admin pages for better performance
@@ -27,6 +26,7 @@ const MediaManager = lazy(() => import('./pages/admin/MediaManager'));
 const Messages = lazy(() => import('./pages/admin/Messages'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 const SEOMonitor = lazy(() => import('./pages/admin/SEOMonitor'));
+const PartnerSubmissions = lazy(() => import('./pages/admin/PartnerSubmissions'));
 
 // Loading component for Suspense
 const LoadingSpinner = () => (
@@ -41,7 +41,7 @@ const AppRoutes: React.FC = () => {
 
   return (
     <PullToRefresh>
-      <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
+      <div className="min-h-screen bg-slate-900 transition-colors duration-200">
         <Toaster position="top-right" />
         {!isAdminRoute && <Navbar />}
         <Routes>
@@ -66,6 +66,7 @@ const AppRoutes: React.FC = () => {
                   <Route path="messages" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><Messages /></Suspense></ProtectedRoute>} />
                   <Route path="settings" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><Settings /></Suspense></ProtectedRoute>} />
                   <Route path="seo" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><SEOMonitor /></Suspense></ProtectedRoute>} />
+                  <Route path="partners" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><PartnerSubmissions /></Suspense></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
           </Route>
         </Routes>
@@ -73,7 +74,6 @@ const AppRoutes: React.FC = () => {
         
         {/* PWA Components */}
         <PWAInstallPrompt />
-        <PWAStatus />
       </div>
     </PullToRefresh>
   );
