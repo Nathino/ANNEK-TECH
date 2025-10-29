@@ -410,57 +410,135 @@ const BlogPost: React.FC = () => {
     }
   };
 
-  const handleShare = async (platform: string) => {
+  const handleShare = (platform: string) => {
     if (!post) return;
     
     const url = window.location.href;
     const title = post.title;
     const text = post.content.excerpt;
     
-    try {
-      // Update share count in Firestore
+    // Handle copy - must be synchronous for clipboard API to work
+    if (platform === 'copy') {
+      // Clipboard API requires direct user interaction, not wrapped in async
+      const copyToClipboard = () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(() => {
+            toast.success('Link copied to clipboard!');
+            setTimeout(() => {
+              setShowShareModal(false);
+            }, 1000);
+          }).catch((error) => {
+            console.error('Clipboard error:', error);
+            // Use execCommand as backup
+            const textArea = document.createElement('textarea');
+            textArea.value = url;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+              const successful = document.execCommand('copy');
+              document.body.removeChild(textArea);
+              if (successful) {
+                toast.success('Link copied to clipboard!');
+                setTimeout(() => {
+                  setShowShareModal(false);
+                }, 1000);
+              } else {
+                toast.error('Unable to copy. Please copy manually from address bar.');
+              }
+            } catch (err) {
+              document.body.removeChild(textArea);
+              toast.error('Unable to copy. Please copy manually from address bar.');
+            }
+          });
+        } else {
+          // Older browser fallback
+          const textArea = document.createElement('textarea');
+          textArea.value = url;
+          textArea.style.position = 'fixed';
+          textArea.style.left = '-999999px';
+          textArea.style.top = '-999999px';
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          
+          try {
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            if (successful) {
+              toast.success('Link copied to clipboard!');
+              setTimeout(() => {
+                setShowShareModal(false);
+              }, 1000);
+            } else {
+              toast.error('Unable to copy. Please copy manually from address bar.');
+            }
+          } catch (err) {
+            document.body.removeChild(textArea);
+            toast.error('Unable to copy. Please copy manually from address bar.');
+          }
+        }
+      };
+      
+      copyToClipboard();
+      return;
+    }
+    
+    // For social sharing, open window FIRST (synchronously), then update count
+    let shareUrl = '';
+    let opened = false;
+    
+    if (platform === 'twitter') {
+      shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
+      opened = window.open(shareUrl, '_blank', 'noopener,noreferrer') !== null;
+    } else if (platform === 'facebook') {
+      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+      opened = window.open(shareUrl, '_blank', 'noopener,noreferrer') !== null;
+    } else if (platform === 'linkedin') {
+      shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+      opened = window.open(shareUrl, '_blank', 'noopener,noreferrer') !== null;
+    } else if (platform === 'whatsapp') {
+      const message = `${title}\n\n${text || ''}\n\n${url}`.trim();
+      shareUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      
+      // Open immediately - wa.me handles mobile/desktop automatically
+      opened = window.open(shareUrl, '_blank', 'noopener,noreferrer') !== null;
+      
+      if (!opened) {
+        // Try with location for mobile apps
+        window.location.href = shareUrl;
+        opened = true;
+      }
+    } else if (platform === 'telegram') {
+      shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`${title}\n\n${text}`)}`;
+      opened = window.open(shareUrl, '_blank', 'noopener,noreferrer') !== null;
+    }
+    
+    if (opened) {
+      // Update share count in background (don't await or block)
       const docRef = doc(db, 'content', post.id);
-      await updateDoc(docRef, {
+      updateDoc(docRef, {
         shares: increment(1)
+      }).then(() => {
+        setPost(prev => prev ? {
+          ...prev,
+          shares: (prev.shares || 0) + 1
+        } : null);
+      }).catch((error) => {
+        console.error('Error updating share count:', error);
+        // Don't show error to user, just log it
       });
       
-      setPost(prev => prev ? {
-        ...prev,
-        shares: (prev.shares || 0) + 1
-      } : null);
-      
-      // Handle different sharing platforms
-      if (platform === 'twitter') {
-        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
-        window.open(twitterUrl, '_blank', 'width=600,height=400');
-        toast.success('Shared to Twitter!');
-      } else if (platform === 'facebook') {
-        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-        window.open(facebookUrl, '_blank', 'width=600,height=400');
-        toast.success('Shared to Facebook!');
-      } else if (platform === 'linkedin') {
-        const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
-        window.open(linkedinUrl, '_blank', 'width=600,height=400');
-        toast.success('Shared to LinkedIn!');
-      } else if (platform === 'whatsapp') {
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${title}\n\n${text}\n\n${url}`)}`;
-        window.open(whatsappUrl, '_blank', 'width=600,height=400');
-        toast.success('Shared to WhatsApp!');
-      } else if (platform === 'telegram') {
-        const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`${title}\n\n${text}`)}`;
-        window.open(telegramUrl, '_blank', 'width=600,height=400');
-        toast.success('Shared to Telegram!');
-      } else if (platform === 'copy') {
-        // Copy URL to clipboard
-        await navigator.clipboard.writeText(url);
-        toast.success('Link copied to clipboard!');
-      }
-      
-      // Close modal after sharing
-      setShowShareModal(false);
-    } catch (error) {
-      console.error('Error sharing:', error);
-      toast.error('Failed to share');
+      // Close modal after window opens
+      setTimeout(() => {
+        setShowShareModal(false);
+      }, 500);
+    } else {
+      toast.error('Popup blocked. Please allow popups for this site or try again.');
     }
   };
 

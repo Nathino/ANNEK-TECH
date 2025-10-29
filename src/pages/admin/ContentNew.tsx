@@ -43,6 +43,9 @@ const ContentNew: React.FC = () => {
     seoTitle: '',
     seoDescription: ''
   });
+  
+  // Separate state for tags input to allow free typing
+  const [tagsInput, setTagsInput] = useState<string>('');
 
   // Generate URL slug from title
   const generateSlug = (title: string) => {
@@ -65,21 +68,68 @@ const ContentNew: React.FC = () => {
   // Generate SEO description from content
   const generateSEODescription = (content: NewContentItem) => {
     if (content.type === 'blog') {
-      // Use excerpt if available, otherwise truncate title
+      // Priority 1: Use excerpt if available
       const excerpt = content.content.excerpt || '';
-      if (excerpt.length > 0) {
-        return excerpt.length > 160 ? excerpt.substring(0, 157) + '...' : excerpt;
+      if (excerpt && excerpt.trim().length > 0) {
+        const cleanExcerpt = excerpt.trim();
+        return cleanExcerpt.length > 160 ? cleanExcerpt.substring(0, 157) + '...' : cleanExcerpt;
       }
-      return `Read our latest blog post: ${content.title}. Expert insights and updates from ANNEK TECH.`;
+      
+      // Priority 2: Extract text from blog content (remove HTML tags)
+      const blogContent = content.content.content || '';
+      if (blogContent && blogContent.trim().length > 0) {
+        // Remove HTML tags and get clean text
+        const textContent = blogContent
+          .replace(/<[^>]*>/g, '') // Remove HTML tags
+          .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+          .trim();
+        
+        if (textContent.length > 0) {
+          // Take first meaningful sentence or first 157 characters
+          const firstSentence = textContent.match(/^[^.!?]+[.!?]/)?.[0] || textContent.substring(0, 157);
+          const description = firstSentence.length > 160 
+            ? firstSentence.substring(0, 157) + '...' 
+            : firstSentence.trim();
+          
+          if (description.length > 10) { // Only use if it's meaningful
+            return description;
+          }
+        }
+      }
+      
+      // Priority 3: Use title with company tagline
+      if (content.title && content.title.trim().length > 0) {
+        return `${content.title.trim()}. Expert insights and updates from ANNEK TECH.`;
+      }
+      
+      // Fallback: Generic message only if nothing else is available
+      return `Read our latest blog post: ${content.title || 'Expert insights'}. Expert insights and updates from ANNEK TECH.`;
     }
     return `Discover ${content.title} at ANNEK TECH. Professional web development and technology solutions.`;
   };
 
   // Auto-generate SEO fields when content changes
-  const autoGenerateSEO = (newContent: NewContentItem) => {
-    const seoTitle = newContent.seoTitle || generateSEOTitle(newContent.title, newContent.type);
-    const seoDescription = newContent.seoDescription || generateSEODescription(newContent);
-    const slug = newContent.slug || (newContent.type === 'blog' ? generateSlug(newContent.title) : '');
+  const autoGenerateSEO = (newContent: NewContentItem, forceRegenerate: boolean = false) => {
+    // Always regenerate SEO title from title if title exists
+    const seoTitle = (forceRegenerate || !newContent.seoTitle) && newContent.title
+      ? generateSEOTitle(newContent.title, newContent.type)
+      : (newContent.seoTitle || generateSEOTitle(newContent.title, newContent.type));
+    
+    // Always regenerate SEO description if content changed or if it's the static default
+    const currentDescription = newContent.seoDescription || '';
+    const staticPattern = /^Read our latest blog post:/;
+    const shouldRegenerate = forceRegenerate || 
+                             !newContent.seoDescription || 
+                             staticPattern.test(currentDescription);
+    
+    const seoDescription = shouldRegenerate 
+      ? generateSEODescription(newContent)
+      : newContent.seoDescription;
+    
+    // Regenerate slug if title changed
+    const slug = (forceRegenerate || !newContent.slug) && newContent.title && newContent.type === 'blog'
+      ? generateSlug(newContent.title)
+      : (newContent.slug || (newContent.type === 'blog' ? generateSlug(newContent.title) : ''));
 
     return {
       ...newContent,
@@ -217,6 +267,7 @@ const ContentNew: React.FC = () => {
           readTime: 5,
           category: 'general'
         };
+        setTagsInput(''); // Reset tags input when switching to blog type
         break;
     }
 
@@ -1067,8 +1118,8 @@ const ContentNew: React.FC = () => {
                         content: { ...content.content, excerpt: newExcerpt }
                       };
                       
-                      // Auto-generate SEO description when excerpt changes
-                      const contentWithSEO = autoGenerateSEO(updatedContent);
+                      // Auto-generate SEO description when excerpt changes (force regeneration)
+                      const contentWithSEO = autoGenerateSEO(updatedContent, true);
                       setContent(contentWithSEO);
                       validateField('excerpt', newExcerpt);
                     }}
@@ -1095,10 +1146,14 @@ const ContentNew: React.FC = () => {
                   <RichTextEditor
                     value={content.content.content || ''}
                     onChange={(value) => {
-                      setContent(prev => ({
-                        ...prev,
-                        content: { ...prev.content, content: value }
-                      }));
+                      const updatedContent = {
+                        ...content,
+                        content: { ...content.content, content: value }
+                      };
+                      
+                      // Auto-generate SEO description when blog content changes
+                      const contentWithSEO = autoGenerateSEO(updatedContent, true);
+                      setContent(contentWithSEO);
                       validateField('content', value);
                     }}
                     placeholder="Write your blog post content here..."
@@ -1206,21 +1261,43 @@ const ContentNew: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      value={content.content.tags?.join(', ') || ''}
-                      onChange={(e) => {
-                        const tags = e.target.value.split(',').map(t => t.trim()).filter(t => t);
+                      value={tagsInput || content.content.tags?.join(', ') || ''}
+                      onBlur={(e) => {
+                        // Parse tags only on blur (when user finishes typing)
+                        const inputValue = e.target.value.trim();
+                        const tags = inputValue ? inputValue.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
                         setContent(prev => ({
                           ...prev,
                           content: { ...prev.content, tags }
                         }));
+                        // Update the input state to match parsed tags
+                        setTagsInput(tags.join(', '));
                         validateField('tags', tags);
+                      }}
+                      onChange={(e) => {
+                        // Allow free typing - update only the input state
+                        setTagsInput(e.target.value);
+                      }}
+                      onKeyDown={(e) => {
+                        // Allow Enter to trigger blur and parse tags
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.currentTarget.blur();
+                        }
+                      }}
+                      onFocus={() => {
+                        // When focused, ensure we're showing the raw input value
+                        const currentTags = content.content.tags?.join(', ') || '';
+                        if (tagsInput !== currentTags) {
+                          setTagsInput(currentTags);
+                        }
                       }}
                       className={`w-full px-4 py-3 bg-slate-800 border rounded-xl text-slate-200 focus:outline-none focus:ring-2 transition-all duration-200 ${
                         errors.tags 
                           ? 'border-red-500 focus:ring-red-500/50' 
                           : 'border-slate-600 focus:ring-emerald-500/50 focus:border-emerald-500'
                       }`}
-                      placeholder="Technology, Web Development, etc."
+                      placeholder="Technology, Web Development, etc. (press Enter or click away to save)"
                       required
                     />
                     {errors.tags && (

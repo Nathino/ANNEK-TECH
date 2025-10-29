@@ -26,6 +26,8 @@ const ContentEdit: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [originalContent, setOriginalContent] = useState<ContentItem | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  // Separate state for tags input to allow free typing
+  const [tagsInput, setTagsInput] = useState<string>('');
   
   // Image upload hook with compression
   const { uploadImage, uploading, progress } = useImageUpload({
@@ -82,6 +84,12 @@ const ContentEdit: React.FC = () => {
         setContent(contentData);
         setOriginalContent(JSON.parse(JSON.stringify(contentData))); // Deep copy
         setHasUnsavedChanges(false);
+        // Initialize tags input when content is loaded
+        if (contentData.type === 'blog' && contentData.content?.tags) {
+          setTagsInput((contentData.content.tags as string[]).join(', ') || '');
+        } else {
+          setTagsInput('');
+        }
       } else {
         console.log('No document found with ID:', id);
         toast.error('Content not found');
@@ -1030,10 +1038,35 @@ const ContentEdit: React.FC = () => {
                   <label className="block text-sm font-medium text-slate-400 mb-1 md:mb-2">Tags (comma-separated)</label>
                   <input
                     type="text"
-                    value={(content.content.tags || []).join(', ')}
-                    onChange={(e) => handleContentChange('tags', e.target.value.split(',').map(t => t.trim()))}
+                    value={tagsInput || (content.content.tags || []).join(', ') || ''}
+                    onBlur={(e) => {
+                      // Parse tags only on blur (when user finishes typing)
+                      const inputValue = e.target.value.trim();
+                      const tags = inputValue ? inputValue.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+                      handleContentChange('tags', tags);
+                      // Update the input state to match parsed tags
+                      setTagsInput(tags.join(', '));
+                    }}
+                    onChange={(e) => {
+                      // Allow free typing - update only the input state
+                      setTagsInput(e.target.value);
+                    }}
+                    onKeyDown={(e) => {
+                      // Allow Enter to trigger blur and parse tags
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.currentTarget.blur();
+                      }
+                    }}
+                    onFocus={() => {
+                      // When focused, ensure we're showing the raw input value
+                      const currentTags = (content.content.tags || []).join(', ') || '';
+                      if (tagsInput !== currentTags) {
+                        setTagsInput(currentTags);
+                      }
+                    }}
                     className="w-full px-3 md:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base"
-                    placeholder="Technology, Web Development, etc."
+                    placeholder="Technology, Web Development, etc. (press Enter or click away to save)"
                   />
                 </div>
                 <div>
