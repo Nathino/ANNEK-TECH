@@ -384,40 +384,42 @@ const Dashboard: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-8 w-full">
               {/* Recent Content */}
-              <div className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 shadow-lg">
+              <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 shadow-lg overflow-x-auto">
                 <div className="p-3 md:p-6 border-b border-slate-700/50">
                   <h2 className="text-lg md:text-xl font-semibold text-emerald-400">Recent Content</h2>
                 </div>
                 {dashboardData.recentContent.length > 0 ? (
-                  <div className="divide-y divide-slate-700/50">
+                  <div className="divide-y divide-slate-700/50 min-w-0">
                     {dashboardData.recentContent.map((item) => (
                       <div
                         key={item.id}
-                        className="p-3 md:p-6 flex items-center justify-between cursor-pointer hover:bg-slate-800/50 transition-colors group"
+                        className="p-3 md:p-6 cursor-pointer hover:bg-slate-800/50 transition-colors group"
                         onClick={() => handleContentClick(item)}
                       >
-                        <div className="flex items-center gap-2 md:gap-4 flex-1">
-                          <div className="p-1.5 md:p-3 rounded-lg bg-slate-700/50 group-hover:bg-slate-700/70 transition-colors">
-                            {item.type === 'blog' ? (
-                              <BookOpen className="h-4 w-4 md:h-5 md:w-5 text-emerald-400" />
-                            ) : (
-                              <FileText className="h-4 w-4 md:h-5 md:w-5 text-slate-400" />
-                            )}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full min-w-0">
+                          <div className="flex items-start gap-2 md:gap-4 flex-1 min-w-0">
+                            <div className="p-1.5 md:p-3 rounded-lg bg-slate-700/50 group-hover:bg-slate-700/70 transition-colors flex-shrink-0">
+                              {item.type === 'blog' ? (
+                                <BookOpen className="h-4 w-4 md:h-5 md:w-5 text-emerald-400" />
+                              ) : (
+                                <FileText className="h-4 w-4 md:h-5 md:w-5 text-slate-400" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                              <p 
+                                className="text-slate-200 font-medium group-hover:text-emerald-400 transition-colors break-words leading-tight"
+                                title={item.title}
+                              >
+                                {item.title}
+                              </p>
+                              <p className="text-sm text-slate-400 capitalize mt-1">{item.type} • {item.status}</p>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p 
-                              className="text-slate-200 font-medium group-hover:text-emerald-400 transition-colors break-words leading-tight"
-                              title={item.title}
-                            >
-                              {item.title}
-                            </p>
-                            <p className="text-sm text-slate-400 capitalize">{item.type} • {item.status}</p>
+                          <div className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm text-slate-400 flex-shrink-0 sm:ml-auto sm:pl-2">
+                            <Eye className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
+                            <span className="whitespace-nowrap">{item.views || 0}</span>
+                            <span className="ml-1 md:ml-2 whitespace-nowrap">{formatDate(item.lastModified)}</span>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-0.5 md:gap-2 text-xs md:text-sm text-slate-400">
-                          <Eye className="h-3 w-3 md:h-4 md:w-4" />
-                          {item.views || 0}
-                          <span className="ml-0.5 md:ml-2">{formatDate(item.lastModified)}</span>
                         </div>
                       </div>
                     ))}
@@ -430,40 +432,42 @@ const Dashboard: React.FC = () => {
               </div>
 
               {/* Top Blog Posts */}
-              <div className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 shadow-lg">
+              <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 shadow-lg overflow-x-auto">
                 <div className="p-3 md:p-6 border-b border-slate-700/50">
                   <h2 className="text-lg md:text-xl font-semibold text-emerald-400">Top Blog Posts</h2>
                 </div>
                 {dashboardData.topBlogPosts.length > 0 ? (
-                  <div className="divide-y divide-slate-700/50">
+                  <div className="divide-y divide-slate-700/50 min-w-0">
                     {dashboardData.topBlogPosts.map((post, index) => (
                       <div
                         key={post.id}
-                        className="p-3 md:p-6 flex items-center justify-between cursor-pointer hover:bg-slate-800/50 transition-colors group"
+                        className="p-3 md:p-6 cursor-pointer hover:bg-slate-800/50 transition-colors group"
                         onClick={() => handleContentClick({ ...post, type: 'blog' as const })}
                       >
-                        <div className="flex items-center gap-2 md:gap-4 flex-1">
-                          <div className="w-5 h-5 md:w-8 md:h-8 bg-emerald-900/30 rounded-full flex items-center justify-center text-xs md:text-sm font-bold text-emerald-400">
-                            {index + 1}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full min-w-0">
+                          <div className="flex items-start gap-2 md:gap-4 flex-1 min-w-0">
+                            <div className="w-5 h-5 md:w-8 md:h-8 bg-emerald-900/30 rounded-full flex items-center justify-center text-xs md:text-sm font-bold text-emerald-400 flex-shrink-0">
+                              {index + 1}
+                            </div>
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                              <p 
+                                className="text-slate-200 font-medium group-hover:text-emerald-400 transition-colors break-words leading-tight"
+                                title={post.title}
+                              >
+                                {post.title}
+                              </p>
+                              <p className="text-sm text-slate-400 mt-1">{post.content?.category || 'General'}</p>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p 
-                              className="text-slate-200 font-medium group-hover:text-emerald-400 transition-colors break-words leading-tight"
-                              title={post.title}
-                            >
-                              {post.title}
-                            </p>
-                            <p className="text-sm text-slate-400">{post.content?.category || 'General'}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 md:gap-4 text-xs md:text-sm text-slate-400">
-                          <div className="flex items-center gap-0.5">
-                            <Eye className="h-3 w-3 md:h-4 md:w-4" />
-                            {post.views || 0}
-                          </div>
-                          <div className="flex items-center gap-0.5">
-                            <Heart className="h-3 w-3 md:h-4 md:w-4" />
-                            {post.likes || 0}
+                          <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-slate-400 flex-shrink-0 sm:ml-auto sm:pl-2">
+                            <div className="flex items-center gap-0.5 whitespace-nowrap">
+                              <Eye className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
+                              <span>{post.views || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-0.5 whitespace-nowrap">
+                              <Heart className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
+                              <span>{post.likes || 0}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
